@@ -21,7 +21,7 @@ if st.session_state["admin_id"] is None:
         if admin_input in ALLOWED_ADMINS:
             st.session_state["admin_id"] = admin_input
             try:
-                st.switch_page("dashboard.py")
+                st.switch_page("pages/dashboard.py")
             except Exception as e:
                 st.code(traceback.format_exc())
         else:
