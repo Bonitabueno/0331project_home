@@ -3,7 +3,7 @@ import traceback
 from admin_module.allowed_admin import ALLOWED_ADMINS_0331
 
 # Streamlit 페이지 설정
-st.set_page_config(page_title="Project 0331", layout="centered", page_icon="📊")
+st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
 
 # 허용된 관리자
 ALLOWED_ADMINS = ALLOWED_ADMINS_0331
