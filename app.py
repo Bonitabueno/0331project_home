@@ -12,9 +12,9 @@ ALLOWED_ADMINS = ALLOWED_ADMINS_0331
 if "admin_id" not in st.session_state:
     st.session_state["admin_id"] = None
 
-# 🔐 로그인 전 화면
+# 로그인 화면
 if st.session_state["admin_id"] is None:
-    st.title("🔐 관리자 로그인")
+    st.title("🔐 로그인")
     admin_input = st.text_input("아이디를 입력하세요")
 
     if st.button("로그인"):
