@@ -1,6 +1,9 @@
 import streamlit as st
 from streamlit_cookies_manager import EncryptedCookieManager
 
+# Streamlit 페이지 설정
+st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
+
 # 쿠키 매니저 설정
 cookies = EncryptedCookieManager(
     prefix="0331_admin_",
