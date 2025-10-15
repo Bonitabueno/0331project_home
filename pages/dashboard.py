@@ -12,9 +12,22 @@ if not cookies.ready():
 # 세션에 저장된 admin_id 불러오기
 admin_id = st.session_state.get("admin_id") or cookies.get("admin_id")
 
-# Streamlit UI
-container = st.container(border=True)
-container.write(f"{admin_id}님 환영합니다.")
+# 로그인 유지
+if admin_id:
+    st.session_state["admin_id"] = admin_id
+
+    # 컨테이너 (환영 문구 + 로그아웃 버튼)
+    container = st.container(border=True)
+    container.write(f"{admin_id}님 환영합니다.")
+    if container.button("로그아웃"):
+        cookies["admin_id"] = ""
+        cookies.save()
+        st.session_state["admin_id"] = None
+        st.success("로그아웃되었습니다.")
+        st.switch_page("app.py")
+else:
+    st.warning("로그인이 필요합니다.")
+    st.stop()
 
 # 컬럼 생성 : 현재 2개
 col1, col2 = st.columns(2)
