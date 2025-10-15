@@ -2,12 +2,15 @@ import streamlit as st
 from streamlit_cookies_manager import EncryptedCookieManager
 
 # 쿠키 매니저 설정
-cookies = EncryptedCookieManager(prefix="0331_admin_")
+cookies = EncryptedCookieManager(
+    prefix="0331_admin_",
+    password="my_secret_password_0331"
+)
 if not cookies.ready():
     st.stop()
 
 # 세션에 저장된 admin_id 불러오기
-admin_id = st.session_state.get("admin_id", None)
+admin_id = st.session_state.get("admin_id") or cookies.get("admin_id")
 
 # Streamlit UI
 container = st.container(border=True)
