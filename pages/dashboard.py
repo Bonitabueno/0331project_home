@@ -1,6 +1,11 @@
 import streamlit as st
 
+# 세션에 저장된 admin_id 불러오기
+admin_id = st.session_state.get("admin_id", None)
+
+# Streamlit UI
 container = st.container(border=True)
+container.write(f"{admin_id}님 환영합니다.")
 
 # 컬럼 생성 : 현재 2개
 col1, col2 = st.columns(2)
