@@ -31,6 +31,7 @@ else:
     st.warning("로그인이 필요합니다.")
     st.switch_page("app.py")
 
+st.divider()
 # 컬럼 생성 : 현재 2개
 col1, col2 = st.columns(2)
 
