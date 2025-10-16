@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import requests
 
-url = "https://raw.githubusercontent.com/bonitabue/project-data/main/data/sample.json"
+url = "https://raw.githubusercontent.com/Bonitabueno/0331project/refs/heads/main/popup_store.json"
 data = requests.get(url).json()
 
 json_str = json.dumps(data, indent=2, ensure_ascii=False)
