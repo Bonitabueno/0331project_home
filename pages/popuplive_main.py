@@ -3,7 +3,7 @@ import requests
 import json
 
 # 깃허브 JSON raw 주소
-url = "https://raw.githubusercontent.com/bonitabueno/project-data/main/data/sample.json"
+url = "https://raw.githubusercontent.com/Bonitabueno/0331project/refs/heads/main/popup_store.json"
 
 # JSON 가져오기
 try:
