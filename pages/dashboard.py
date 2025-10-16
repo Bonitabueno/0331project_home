@@ -26,7 +26,6 @@ if admin_id:
         cookies["admin_id"] = ""
         cookies.save()
         st.session_state["admin_id"] = None
-        st.success("로그아웃되었습니다.")
         st.switch_page("app.py")
 else:
     st.warning("로그인이 필요합니다.")
