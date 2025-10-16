@@ -12,6 +12,17 @@ cookies = EncryptedCookieManager(
 if not cookies.ready():
     st.stop()
 
+
+# 로그인 페이지로 리다이렉트하는 함수
+def redirect_to_login(error_message):
+    st.error(error_message)
+    try:
+        st.switch_page("app.py")
+    except Exception as e:
+        st.error(f"페이지 전환 에러: {str(e)}")
+    st.stop()
+
+
 # 세션에 저장된 admin_id 불러오기
 admin_id = st.session_state.get("admin_id") or cookies.get("admin_id")
 
@@ -30,7 +41,7 @@ if admin_id:
         st.switch_page("app.py")
 else:
     st.warning("로그인이 필요합니다.")
-    st.stop()
+    redirect_to_login()
 
 # 컬럼 생성 : 현재 2개
 col1, col2 = st.columns(2)
