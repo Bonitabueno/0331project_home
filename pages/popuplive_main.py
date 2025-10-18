@@ -16,5 +16,5 @@ df.index = df.index + 1
 df.index.name = "" # 인덱스 열 이름 지정
 
 # Streamlit 표시
-st.title("📋 팝업스토어 리스트")
+st.header("📋 팝업스토어 리스트")
 st.dataframe(df, use_container_width=True)
