@@ -11,4 +11,4 @@ df = pd.DataFrame(data)
 
 # Streamlit 표시
 st.title("📋 팝업스토어 리스트")
-st.dataframe(df, use_container_width=True, hide_index=True)
+st.dataframe(df, use_container_width=True)
