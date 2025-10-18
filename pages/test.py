@@ -12,14 +12,6 @@ json_str = json.dumps(data, indent=2, ensure_ascii=False)
 if "edit_mode" not in st.session_state:
     st.session_state["edit_mode"] = False
 
-# 편집 버튼
-if not st.session_state["edit_mode"]:
-    if st.button("✏️ 편집"):
-        st.session_state["edit_mode"] = True
-else:
-    if st.button("🔒 편집 종료"):
-        st.session_state["edit_mode"] = False
-
 # 텍스트 영역 (편집 가능 여부)
 edited_json = st.text_area(
     "🧾 JSON 데이터",
@@ -27,6 +19,14 @@ edited_json = st.text_area(
     height=800,
     disabled=not st.session_state["edit_mode"]
 )
+
+# 편집 버튼
+if not st.session_state["edit_mode"]:
+    if st.button("✏️ 편집"):
+        st.session_state["edit_mode"] = True
+else:
+    if st.button("🔒 편집 종료"):
+        st.session_state["edit_mode"] = False
 
 # JSON 유효성 검사
 try:
