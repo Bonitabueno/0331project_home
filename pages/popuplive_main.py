@@ -30,7 +30,7 @@ with st.container(border=True):
             st.swtich_page("pages/dashboard.py")
 
     with col2:
-        if st.container.button("로그아웃"):
+        if st.button("로그아웃"):
             cookies["admin_id"] = ""
             cookies.save()
             st.session_state["admin_id"] = None
