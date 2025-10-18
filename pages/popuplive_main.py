@@ -26,7 +26,7 @@ with st.container(border=True):
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.container.button("대시보드"):
+        if st.button("대시보드"):
             st.swtich_page("pages/dashboard.py")
 
     with col2:
