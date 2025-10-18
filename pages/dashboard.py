@@ -9,7 +9,6 @@ st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊
 cookies = init_cookies()
 admin_id = check_login(cookies)
 
-
 # 사용자 컨테이너 (문구 + 로그아웃 버튼)
 container = st.container(border=True)
 container.write(f"{admin_id}님 환영합니다.")
