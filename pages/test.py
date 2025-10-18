@@ -25,7 +25,7 @@ if not st.session_state["edit_mode"]:
     if st.button("✏️ 편집"):
         st.session_state["edit_mode"] = True
 else:
-    if st.button("🔒 편집 종료"):
+    if st.button("🔒 취소"):
         st.session_state["edit_mode"] = False
 
 # JSON 유효성 검사
