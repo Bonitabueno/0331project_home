@@ -5,13 +5,8 @@ from admin_module.cookie_management import init_cookies
 # Streamlit 페이지 설정
 st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
 
-# 쿠키 매니저 설정
-cookies = EncryptedCookieManager(
-    prefix="0331_admin_",
-    password="my_secret_password_0331"
-)
-if not cookies.ready():
-    st.stop()
+# 쿠키 설정
+cookies = init_cookies()
 
 # 세션에 저장된 admin_id 불러오기
 admin_id = st.session_state.get("admin_id") or cookies.get("admin_id")
