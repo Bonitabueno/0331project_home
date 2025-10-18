@@ -1,16 +1,14 @@
 import streamlit as st
 import requests
-import json
+import pandas as pd
 
-# 깃허브 JSON raw 주소
+# JSON 불러오기
 url = "https://raw.githubusercontent.com/Bonitabueno/0331project/refs/heads/main/popup_store.json"
+data = requests.get(url).json()
 
-# JSON 가져오기
-try:
-    response = requests.get(url)
-    response.raise_for_status()  # 요청 에러 확인
-    data = response.json()  # JSON 파싱
-    st.json(data)  # 화면에 예쁘게 표시
-except Exception as e:
-    st.error(f"데이터를 불러오는 중 오류 발생: {e}")
+# DataFrame 변환
+df = pd.DataFrame(data)
 
+# Streamlit 표시
+st.title("📋 팝업스토어 리스트")
+st.dataframe(df, use_container_width=True)
