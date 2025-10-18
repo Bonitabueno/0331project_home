@@ -35,5 +35,5 @@ st.divider()
 
 # Streamlit 표시
 st.markdown(today)
-st.subheader("📋 팝업스토어 리스트")
-st.dataframe(df, use_container_width=True)
+st.markdown("**팝업스토어 리스트**")
+st.dataframe(df)
