@@ -26,11 +26,11 @@ with st.container(border=True):
     col1, col2 = st.columns(2)
     
     with col1:
-        if container.button("대시보드"):
+        if st.container.button("대시보드"):
             st.swtich_page("pages/dashboard.py")
 
     with col2:
-        if container.button("로그아웃"):
+        if st.container.button("로그아웃"):
             cookies["admin_id"] = ""
             cookies.save()
             st.session_state["admin_id"] = None
