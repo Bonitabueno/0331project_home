@@ -30,9 +30,6 @@ if container.button("로그아웃"):
     st.session_state["admin_id"] = None
     st.switch_page("app.py")
 
-# 구분선
-st.divider()
-
 # Streamlit 표시
 st.markdown(today)
 st.markdown("**팝업스토어 리스트**")
