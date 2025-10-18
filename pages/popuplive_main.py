@@ -27,7 +27,7 @@ with st.container(border=True):
     
     with col1:
         if st.button("대시보드"):
-            st.swtich_page("pages/dashboard.py")
+            st.switch_page("pages/dashboard.py")
 
     with col2:
         if st.button("로그아웃"):
