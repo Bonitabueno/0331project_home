@@ -2,6 +2,9 @@ import streamlit as st
 import requests
 import pandas as pd
 
+# Streamlit 페이지 설정
+st.set_page_config(page_title="0331 Project", layout="wide", page_icon="📊")
+
 # JSON 불러오기
 url = "https://raw.githubusercontent.com/Bonitabueno/0331project/refs/heads/main/popup_store.json"
 data = requests.get(url).json()
