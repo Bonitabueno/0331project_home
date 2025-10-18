@@ -22,15 +22,21 @@ df.index = df.index + 1 # 인덱스 열 1번부터 시작
 df.index.name = "" # 인덱스 열 이름 지정
 
 # 사용자 컨테이너 (문구 + 로그아웃 버튼)
-container = st.container(border=True)
-container.write(f"{admin_id}님 환영합니다.")
-if container.button("로그아웃"):
-    cookies["admin_id"] = ""
-    cookies.save()
-    st.session_state["admin_id"] = None
-    st.switch_page("app.py")
+with st.container(border=True):
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if container.button("대시보드"):
+            st.swtich_page("pages/dashboard.py")
+
+    with col2:
+        if container.buttn("로그아웃"):
+            cookies["admin_id"] = ""
+            cookies.save()
+            st.session_state["admin_id"] = None
+            st.switch_page("app.py")
 
 # Streamlit 표시
-st.markdown(today)
+st.markdown(f"**오늘은 {today}입니다.**")
 st.markdown("**팝업스토어 리스트**")
 st.dataframe(df)
