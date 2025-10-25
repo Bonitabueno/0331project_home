@@ -3,6 +3,7 @@ from streamlit_cookies_manager import EncryptedCookieManager
 from admin_module.login_management import init_cookies
 from admin_module.login_management import check_login
 import requests
+import pandas as pd
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
