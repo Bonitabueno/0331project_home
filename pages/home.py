@@ -39,6 +39,10 @@ with col2:
             st.write("컬럼 2 버튼 클릭됨")
 
 
+# 구분선
+st.divider()
+
+# 다중 탭
 tab1, tab2, tab3 = st.tabs(["클라우드타입", "테스트1", "테스트2"])
 
 with tab1:
