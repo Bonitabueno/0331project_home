@@ -32,7 +32,7 @@ if st.session_state["admin_id"] is None:
             cookies["admin_id"] = admin_input
             cookies.save()  # 쿠키 저장
             try:
-                st.switch_page("pages/dashboard.py")
+                st.switch_page("pages/home.py")
             except Exception as e:
                 st.code(traceback.format_exc())
         else:
