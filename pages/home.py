@@ -35,3 +35,33 @@ with col2:
     with container2:
         if st.button("포스트26"):
             st.write("컬럼 2 버튼 클릭됨")
+
+
+tab1, tab2, tab3 = st.tabs(["클라우드타입", "테스트1", "테스트2"])
+
+with tab1:
+    try:
+        response = requests.get("https://status.cloudtype.io/ko/index.json")
+        data = response.json()
+
+        included = data.get("included", [])
+
+        resources = []
+        for item in included:
+            if item.get("type") == "status_page_resource":
+                attr = item.get("attributes", {})
+                resources.append({
+                    "리소스 이름": attr.get("public_name"),
+                    "상태": attr.get("status"),
+                    "가용성": f"{attr.get('availability') * 100:.2f}%" if attr.get("availability") is not None else "N/A"
+                })
+        if resources:
+            df = pd.DataFrame(resources)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+        else:
+            st.info("📭 표시할 리소스 상태 정보가 없습니다.")
+    except Exception as e:
+        st.error(f"❌ 상태 정보를 불러오는 데 실패했습니다: {str(e)}")
+
+    st.link_button("상태조회페이지", "https://status.cloudtype.io/ko")    
+
