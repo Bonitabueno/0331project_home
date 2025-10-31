@@ -11,8 +11,6 @@ cookies = EncryptedCookieManager(
     prefix="0331_admin_",
     password="my_secret_password_0331"  # 원하는 임의 문자열 (비밀키)
 )
-if not cookies.ready():
-    st.stop()
 
 # 허용된 관리자
 ALLOWED_ADMINS = ALLOWED_ADMINS_0331
