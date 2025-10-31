@@ -11,7 +11,7 @@ ALLOWED_ADMINS = ALLOWED_ADMINS_0331
 
 # 세션 + 쿠키 초기화
 if "admin_id" not in st.session_state:
-    st.session_state["admin_id"]
+    st.session_state["admin_id"] = None
 
 # 로그인 화면
 if st.session_state["admin_id"] is None:
