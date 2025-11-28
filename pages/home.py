@@ -43,7 +43,7 @@ with col3:
     with container2:
         if st.button("맛집요정"):
             st.write("페이지 준비중입니다.")
-저
+            
 # 구분선
 st.divider()
 
