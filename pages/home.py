@@ -24,7 +24,7 @@ if container.button("로그아웃"):
 st.divider()
 
 # 컬럼 생성 : 현재 2개
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     container1 = st.container(border=True)
@@ -36,9 +36,14 @@ with col2:
     container2 = st.container(border=True)
     with container2:
         if st.button("포스트26"):
-            st.write("컬럼 2 버튼 클릭됨")
+            st.write("페이지 준비중입니다.")
 
-
+with col3:
+    container2 = st.container(border=True)
+    with container2:
+        if st.button("맛집요정"):
+            st.write("페이지 준비중입니다.")
+저
 # 구분선
 st.divider()
 
