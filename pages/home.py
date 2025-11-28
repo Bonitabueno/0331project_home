@@ -42,7 +42,7 @@ with col3:
     container2 = st.container(border=True)
     with container2:
         if st.button("맛집요정"):
-            st.write("페이지 준비중입니다.")
+            st.switch_page("pages/matjipfairy_main.py")
             
 # 구분선
 st.divider()
