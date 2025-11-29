@@ -48,20 +48,38 @@ def parse_address(addr):
 
     # 모든 조합 생성
     results = []
-    for city in city_candidates:
-        for district in district_candidates:
-            results.append({
-                "restaurant_name": restaurant_name,
-                "restaurant_type": restaurant_type,
-                "city": city,
-                "district": district,
-                "neighborhood": neighborhood,
-                "address": address,
-                "menu": [m.strip() for m in menu.split(",") if m.strip()],
-                "summary_menu": summary_menu,
-                "link": link,
-                "station": station
-            })
+
+    # 일반 케이스: district_candidates, city_candidates가 각각 1개면 그대로 사용
+    if len(city_candidates) == 1 and len(district_candidates) == 1:
+        results.append({
+            "restaurant_name": restaurant_name,
+            "restaurant_type": restaurant_type,
+            "city": city_candidates[0],
+            "district": district_candidates[0],
+            "neighborhood": neighborhood,
+            "address": address,
+            "menu": [m.strip() for m in menu.split(",") if m.strip()],
+            "summary_menu": summary_menu,
+            "link": link,
+            "station": station
+        })
+    else:
+        # 특수 케이스: 중첩 district/city가 있는 경우 모든 조합 생성
+        for city in city_candidates:
+            for district in district_candidates:
+                results.append({
+                    "restaurant_name": restaurant_name,
+                    "restaurant_type": restaurant_type,
+                    "city": city,
+                    "district": district,
+                    "neighborhood": neighborhood,
+                    "address": address,
+                    "menu": [m.strip() for m in menu.split(",") if m.strip()],
+                    "summary_menu": summary_menu,
+                    "link": link,
+                    "station": station
+                })
+
     return results
 
 if st.button("데이터 확인"):
