@@ -31,7 +31,7 @@ st.write("페이지 준비중입니다.")
 
 
 # 컬럼 생성 : 현재 2개
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 
 with col1:
     container1 = st.container(border=True)
@@ -43,10 +43,4 @@ with col2:
     container2 = st.container(border=True)
     with container2:
         if st.button("포스트26"):
-            st.write("페이지 준비중입니다.")
-
-with col3:
-    container2 = st.container(border=True)
-    with container2:
-        if st.button("맛집요정"):
-            st.switch_page("pages/matjipfairy_main.py")
+            st.write("페이지 준비중입니다."
