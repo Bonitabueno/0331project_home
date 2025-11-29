@@ -18,13 +18,15 @@ link = st.text_input("링크", key="link_input")
 station = st.text_input("주변 역", key="station_input")
 
 if st.button("데이터 확인"):
+    fixed_address = address.replace(" District", "-gu")
+    
     st.json({
         "restaurant_name": restaurant_name,
         "restaurant_type": restaurant_type,
         "city": city,
         "district": district,
         "neighborhood": neighborhood,
-        "address": address,
+        "address": fixed_address,
         "menu": [m.strip() for m in menu.split(",") if m.strip()],
         "summary_menu": summary_menu,
         "link": link,
