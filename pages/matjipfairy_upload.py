@@ -1,14 +1,8 @@
 import streamlit as st
+from common_module.styles import apply_placeholder_style
 
-# placeholder 글씨 크기 줄이기 위한 CSS
-st.markdown("""
-    <style>
-    input::placeholder {
-        font-size: 12px !important;   /* 원하는 크기로 조절 */
-        color: #999999 !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# CSS 설정
+apply_placeholder_style()
 
 st.subheader("식당/카페 정보 업로드")
 
