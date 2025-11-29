@@ -31,15 +31,12 @@ st.write("페이지 준비중입니다.")
 
 
 # 컬럼 생성 : 현재 2개
-col1, col2 = st.columns(2)
+left_col, right_col = st.columns(2)
 
-with col1:
-    container1 = st.container(border=True)
-    with container1:
-        if st.button("팝업라이브"):
-            st.switch_page("pages/popuplive_main.py")
+with left_col:
+    st.link_button("STG")
 
-with col2:
+with right_col:
     container2 = st.container(border=True)
     with container2:
         if st.button("포스트26"):
