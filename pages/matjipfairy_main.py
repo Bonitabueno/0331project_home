@@ -29,7 +29,6 @@ with st.container(border=True):
 
 st.write("페이지 준비중입니다.")
 
-
 # 컬럼 생성 : 현재 2개
 left_col, right_col = st.columns(2)
 
@@ -37,7 +36,4 @@ with left_col:
     st.link_button("STG")
 
 with right_col:
-    container2 = st.container(border=True)
-    with container2:
-        if st.button("포스트26"):
-            st.write("페이지 준비중입니다."
+    st.link_button("PRD")
