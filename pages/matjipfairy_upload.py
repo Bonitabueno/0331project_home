@@ -16,36 +16,26 @@ station = st.text_input("주변 역", key="station_input")
 
 
 def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, link, station):
-    # 쉼표 분리 후 숫자/불필요 항목(South Korea) 제거
     parts = [p.strip() for p in addr.split(",") if p.strip() and "South Korea" not in p and not any(c.isdigit() for c in p)]
 
-    # neighborhood 추출
+    # neighborhood
     neighborhood = next((p for p in parts if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup")), "")
 
-    # district 후보: -gu, -si
-    district_candidates = [p for p in parts if p.endswith("-gu") or p.endswith("-si")]
+    # district candidates: -gu, -si
+    district_candidates = [p for p in parts if p.endswith("-gu") or (p.endswith("-si") and p != neighborhood)]
 
-    # city 후보
-    special_cities = ["Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju", "Ulsan", "Sejong"]
+    # do candidate
     do_candidates = [p for p in parts if p.endswith("-do")]
 
+    # si candidate
     si_candidates = [p for p in parts if p.endswith("-si") and p not in district_candidates]
-
-    city_candidates = []
-    if do_candidates:
-        city_candidates.extend(do_candidates)
-    if si_candidates:
-        city_candidates.extend(si_candidates)
-    for p in reversed(parts):
-        if p in special_cities:
-            city_candidates.append(p)
 
     results = []
 
-    # 일반 주소: 특별시/광역시+구+동 또는 도+시+동
+    # 일반 주소: 1:1 매칭
     if len(do_candidates) <= 1 and len(district_candidates) <= 1:
-        city = city_candidates[0] if city_candidates else ""
-        district = district_candidates[0] if district_candidates else ""
+        city = do_candidates[0] if do_candidates else (si_candidates[0] if si_candidates else "")
+        district = district_candidates[0] if district_candidates else (si_candidates[0] if si_candidates else "")
         results.append({
             "restaurant_name": restaurant_name,
             "restaurant_type": restaurant_type,
@@ -103,6 +93,7 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
         })
 
     return results
+
 
 if st.button("데이터 확인"):
     parsed_data = parse_address(address, restaurant_name, restaurant_type, menu, summary_menu, link, station)
