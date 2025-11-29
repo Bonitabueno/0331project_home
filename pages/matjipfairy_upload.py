@@ -19,7 +19,7 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
     addr_parts = [p.strip() for p in addr.split(",") if p.strip()]
     filtered = [p for p in addr_parts if "South Korea" not in p and not any(c.isdigit() for c in p)]
 
-    # neighborhood
+    # neighborhood 추출
     neighborhood = ""
     for p in filtered:
         if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup"):
@@ -42,11 +42,13 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
 
     # JSON 생성
     results = []
-    if len(city_candidates) == 1 and len(district_candidates) == 1:
+    # 일반 케이스: district 1개, city 1개(또는 특별시)일 때
+    if len(district_candidates) == 1 and len(city_candidates) <= 2:
+        city = [c for c in city_candidates if c in special_cities] or [city_candidates[0]]
         results.append({
             "restaurant_name": restaurant_name,
             "restaurant_type": restaurant_type,
-            "city": city_candidates[0],
+            "city": city[0],
             "district": district_candidates[0],
             "neighborhood": neighborhood,
             "address": addr,
@@ -56,6 +58,7 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
             "station": station
         })
     else:
+        # 특수 케이스: city/district 중복 조합 생성
         for city in city_candidates:
             for district in district_candidates:
                 results.append({
