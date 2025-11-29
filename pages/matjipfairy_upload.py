@@ -4,8 +4,6 @@ from common_module.styles import apply_placeholder_style
 # CSS 설정
 apply_placeholder_style()
 
-import streamlit as st
-
 st.subheader("식당/카페 정보 업로드 (주소 기반)")
 
 # 기본 입력
@@ -27,25 +25,26 @@ def parse_address(addr):
     # South Korea와 상세 번호 제외
     filtered = [p for p in addr_parts if "South Korea" not in p and not any(c.isdigit() for c in p)]
 
-    # neighborhood: 보통 마지막에서 2~3번째
-    neighborhood = None
+    # neighborhood: 보통 -dong, -ri, -eup
+    neighborhood = ""
     for p in filtered:
         if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup"):
             neighborhood = p
             break
-    if not neighborhood:
-        neighborhood = ""
 
     # 후보 district: -gu, -si 등
     district_candidates = [p for p in filtered if p.endswith("-gu") or p.endswith("-si")]
 
-    # 후보 city: 마지막 항목에서 -do 제거
+    # 후보 city: -do 제거, 특별시/광역시 처리
+    special_cities = ["Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju", "Ulsan", "Sejong"]
     city_candidates = []
-    for p in filtered:
+    for p in reversed(filtered):
         if p.endswith("-do"):
             city_candidates.append(p.replace("-do","").strip())
-        elif "-si" in p or "-gu" in p:
+        elif p.endswith("-si") or p.endswith("-gu"):
             city_candidates.append(p.split("-")[0].strip())
+        elif p in special_cities:
+            city_candidates.append(p)
 
     # 모든 조합 생성
     results = []
