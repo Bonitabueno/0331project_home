@@ -1,6 +1,9 @@
 import streamlit as st
 from common_module.styles import apply_placeholder_style
 
+# Streamlit 페이지 설정
+st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
+
 apply_placeholder_style()
 
 st.subheader("식당/카페 정보 업로드 (주소 기반)")
