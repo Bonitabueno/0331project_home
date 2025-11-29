@@ -15,8 +15,8 @@ station = st.text_input("주변 역", key="station_input")
 
 
 def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, link, station):
-    # 쉼표로 분리 후 숫자 포함 항목, South Korea 제거
-    parts = [p.strip() for p in addr.split(",") if p.strip() and not any(c.isdigit() for c in p) and "South Korea" not in p]
+    # 쉼표 분리, 숫자/불필요 항목 제거
+    parts = [p.strip() for p in addr.split(",") if p.strip() and "South Korea" not in p and not any(c.isdigit() for c in p)]
 
     # neighborhood 추출
     neighborhood = next((p for p in parts if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup")), "")
@@ -37,42 +37,32 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
 
     results = []
 
-    # district와 city 순서대로 1:1 매칭
-    for i, district in enumerate(district_candidates):
-        if i < len(city_candidates):
-            city = city_candidates[i]
-        else:
-            # city 후보 부족 시 마지막 city 반복 금지
-            city = city_candidates[-1] if city_candidates else ""
-        results.append({
-            "restaurant_name": restaurant_name,
-            "restaurant_type": restaurant_type,
-            "city": city,
-            "district": district,
-            "neighborhood": neighborhood,
-            "address": addr,
-            "menu": [m.strip() for m in menu.split(",") if m.strip()],
-            "summary_menu": summary_menu,
-            "link": link,
-            "station": station
-        })
+    # 특수 중첩 처리: district × city 모든 조합 생성
+    for district in district_candidates:
+        for city in city_candidates:
+            results.append({
+                "restaurant_name": restaurant_name,
+                "restaurant_type": restaurant_type,
+                "city": city,
+                "district": district,
+                "neighborhood": neighborhood,
+                "address": addr,
+                "menu": [m.strip() for m in menu.split(",") if m.strip()],
+                "summary_menu": summary_menu,
+                "link": link,
+                "station": station
+            })
 
-    # 일반 주소 처리: district 후보 1개, city 후보 1개만 있을 경우 JSON 1개 생성
-    if not results and district_candidates and city_candidates:
-        results.append({
-            "restaurant_name": restaurant_name,
-            "restaurant_type": restaurant_type,
-            "city": city_candidates[0],
-            "district": district_candidates[0],
-            "neighborhood": neighborhood,
-            "address": addr,
-            "menu": [m.strip() for m in menu.split(",") if m.strip()],
-            "summary_menu": summary_menu,
-            "link": link,
-            "station": station
-        })
+    # 중복 제거: 이미 동일한 city+district 조합이 있으면 추가하지 않음
+    unique_results = []
+    seen = set()
+    for r in results:
+        key = (r["city"], r["district"])
+        if key not in seen:
+            seen.add(key)
+            unique_results.append(r)
 
-    return results
+    return unique_results
 
 
 if st.button("데이터 확인"):
