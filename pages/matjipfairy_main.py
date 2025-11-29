@@ -33,7 +33,7 @@ st.write("페이지 준비중입니다.")
 left_col, right_col = st.columns(2)
 
 with left_col:
-    st.link_button("STG")
+    st.link_button("STG", "https://port-0-matjip-fairy-global-mbrrqxp1539f7d68.sel4.cloudtype.app")
 
 with right_col:
-    st.link_button("PRD")
+    st.link_button("PRD", "https://matjipfiary.netlify.app")
