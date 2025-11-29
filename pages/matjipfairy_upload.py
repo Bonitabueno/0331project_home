@@ -6,7 +6,7 @@ apply_placeholder_style()
 
 st.subheader("식당/카페 정보 업로드 (주소 기반)")
 
-# 기본 입력
+# 입력 필드
 restaurant_name = st.text_input("식당명", key="restaurant_name_input")
 restaurant_type = st.text_input("업종", key="restaurant_type_input")
 address = st.text_input("전체 주소", key="address_input")
@@ -15,27 +15,21 @@ summary_menu = st.text_input("메뉴 요약", key="summary_menu_input")
 link = st.text_input("링크", key="link_input")
 station = st.text_input("주변 역", key="station_input")
 
-def parse_address(addr):
-    """
-    주소 문자열을 받아 city, district, neighborhood 추출.
-    특수 케이스: 기초단체 중복 시 모든 조합으로 반환
-    """
+def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, link, station):
     addr_parts = [p.strip() for p in addr.split(",") if p.strip()]
-
-    # South Korea와 상세 번호 제외
     filtered = [p for p in addr_parts if "South Korea" not in p and not any(c.isdigit() for c in p)]
 
-    # neighborhood: 보통 -dong, -ri, -eup
+    # neighborhood
     neighborhood = ""
     for p in filtered:
         if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup"):
             neighborhood = p
             break
 
-    # 후보 district: -gu, -si 등
+    # district 후보
     district_candidates = [p for p in filtered if p.endswith("-gu") or p.endswith("-si")]
 
-    # 후보 city: -do 제거, 특별시/광역시 처리
+    # city 후보
     special_cities = ["Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju", "Ulsan", "Sejong"]
     city_candidates = []
     for p in reversed(filtered):
@@ -46,10 +40,8 @@ def parse_address(addr):
         elif p in special_cities:
             city_candidates.append(p)
 
-    # 모든 조합 생성
+    # JSON 생성
     results = []
-
-    # 일반 케이스: district_candidates, city_candidates가 각각 1개면 그대로 사용
     if len(city_candidates) == 1 and len(district_candidates) == 1:
         results.append({
             "restaurant_name": restaurant_name,
@@ -57,14 +49,13 @@ def parse_address(addr):
             "city": city_candidates[0],
             "district": district_candidates[0],
             "neighborhood": neighborhood,
-            "address": address,
+            "address": addr,
             "menu": [m.strip() for m in menu.split(",") if m.strip()],
             "summary_menu": summary_menu,
             "link": link,
             "station": station
         })
     else:
-        # 특수 케이스: 중첩 district/city가 있는 경우 모든 조합 생성
         for city in city_candidates:
             for district in district_candidates:
                 results.append({
@@ -73,15 +64,15 @@ def parse_address(addr):
                     "city": city,
                     "district": district,
                     "neighborhood": neighborhood,
-                    "address": address,
+                    "address": addr,
                     "menu": [m.strip() for m in menu.split(",") if m.strip()],
                     "summary_menu": summary_menu,
                     "link": link,
                     "station": station
                 })
-
     return results
 
+# 버튼 클릭 시 함수 호출
 if st.button("데이터 확인"):
-    parsed_data = parse_address(address)
+    parsed_data = parse_address(address, restaurant_name, restaurant_type, menu, summary_menu, link, station)
     st.json(parsed_data)
