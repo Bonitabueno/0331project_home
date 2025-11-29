@@ -36,4 +36,4 @@ with left_col:
     st.link_button("STG", "https://port-0-matjip-fairy-global-mbrrqxp1539f7d68.sel4.cloudtype.app")
 
 with right_col:
-    st.link_button("PRD", "https://matjipfiary.netlify.app")
+    st.link_button("PRD", "https://matjipfairy.netlify.app")
