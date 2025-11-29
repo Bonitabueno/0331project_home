@@ -10,22 +10,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-menu = st.text_input("메뉴", placeholder="여러 메뉴를 입력할 경우 쉼표로 구분해서 입력해주세요.")
-
-
-
 st.subheader("식당/카페 정보 업로드")
 
-restaurant_name = st.text_input("식당명")
-restaurant_type = st.text_input("업종")
-city = st.text_input("특별시/광역시/도")
-district = st.text_input("시/군/구")
-neighborhood = st.text_input("읍/면/동")
-address = st.text_input("주소")
-menu = st.text_input("메뉴", placeholder ="여러 메뉴를 입력할 경우 쉼표로 구분해서 입력해주세요.")
-summary_menu = st.text_input("메뉴 요약")
-link = st.text_input("링크")
-station = st.text_input("주변 역")
+restaurant_name = st.text_input("식당명", key="restaurant_name_input")
+restaurant_type = st.text_input("업종", key="restaurant_type_input")
+city = st.text_input("특별시/광역시/도(City)", key="city_input")
+district = st.text_input("시/군/구(District)", key="district_input")
+neighborhood = st.text_input("읍/면/동("Neighborhood"), key="neighborhood_input")
+address = st.text_input("전체 주소", key="address_input")
+menu = st.text_input("메뉴", placeholder ="여러 메뉴를 입력할 경우 쉼표로 구분해서 입력해주세요.", key="menu_input")
+summary_menu = st.text_input("메뉴 요약", key="summary_menu_input")
+link = st.text_input("링크", key="link_input")
+station = st.text_input("주변 역", key="station_input")
 
 if st.button("데이터 확인"):
     st.json({
