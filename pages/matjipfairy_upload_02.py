@@ -16,6 +16,10 @@ MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = "matjip_db"
 COLLECTION_NAME = "matjip_info"
 
+# 세션 상태 초기화
+if "matjip_data" not in st.session_state:
+    st.session_state.matjip_data = None
+    
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 st.subheader("식당/카페 정보 업로드")
@@ -31,11 +35,11 @@ summary_menu = st.text_input("메뉴 요약", key="summary_menu_input")
 link = st.text_input("링크", key="link_input")
 station = st.text_input("주변 역", key="station_input")
 
-# 데이터 확인 버튼
+# 데이터 확인
 if st.button("데이터 확인"):
     fixed_address = address.replace(" District", "-gu")
     
-    matjip_data = {
+    st.session_state.matjip_data = {
         "restaurant_name": restaurant_name,
         "restaurant_type": restaurant_type,
         "city": city,
@@ -48,7 +52,7 @@ if st.button("데이터 확인"):
         "station": station
     }
     
-    st.json(matjip_data)
+    st.json(st.session_state.matjip_data)
     st.info("데이터를 한번 더 확인한 후, 아래 버튼으로 업로드 해주세요.")
 
     # 업로드 버튼 (데이터 확인 후만 표시)
