@@ -13,7 +13,7 @@ cookies = init_cookies()
 admin_id = check_login(cookies)
 
 # 아이디별 접근 페이지 설정
-allowed_pages = ALLOWED_ADMINS.get(admin_id, [])
+allowed_pages = ALLOWED_ADMINS_0331.get(admin_id, [])
 
 # 사용자 컨테이너 (문구 + 로그아웃 버튼)
 container = st.container(border=True)
