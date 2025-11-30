@@ -32,7 +32,7 @@ with col1:
     container1 = st.container(border=True)
     with container1:
         if st.button("팝업라이브"):
-            allowed_pages = ALLOWED_ADMINS.get(admin_id, [])
+            allowed_pages = ALLOWED_ADMINS_0331.get(admin_id, [])
             if "popuplive" in allowed_pages:
                 st.switch_page("pages/popuplive_main.py")
             else:
@@ -42,7 +42,7 @@ with col2:
     container2 = st.container(border=True)
     with container2:
         if st.button("포스트26"):
-            allowed_pages = ALLOWED_ADMINS.get(admin_id, [])
+            allowed_pages = ALLOWED_ADMINS_0331.get(admin_id, [])
             if "post26" in allowed_pages:
                 st.switch_page("pages/post26_main.py")
             else:
@@ -52,7 +52,7 @@ with col3:
     container3 = st.container(border=True)
     with container3:
         if st.button("맛집요정"):
-            allowed_pages = ALLOWED_ADMINS.get(admin_id, [])
+            allowed_pages = ALLOWED_ADMINS_0331.get(admin_id, [])
             if "matjipfairy" in allowed_pages:
                 st.switch_page("pages/matjipfairy_main.py")
             else:
