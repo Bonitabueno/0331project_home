@@ -35,11 +35,11 @@ summary_menu = st.text_input("메뉴 요약", key="summary_menu_input")
 link = st.text_input("링크", key="link_input")
 station = st.text_input("주변 역", key="station_input")
 
-# 데이터 확인
+# 데이터 확인 버튼
 if st.button("데이터 확인"):
     fixed_address = address.replace(" District", "-gu")
     
-    st.session_state.matjip_data = {
+    matjip_data = {
         "restaurant_name": restaurant_name,
         "restaurant_type": restaurant_type,
         "city": city,
@@ -52,27 +52,17 @@ if st.button("데이터 확인"):
         "station": station
     }
     
-    st.json(st.session_state.matjip_data)
+    st.json(matjip_data)
+    st.success("데이터 확인 완료. 아래 버튼으로 업로드하세요.")
 
-# 업로드 버튼
-if st.session_state.matjip_data and st.button("MongoDB 업로드"):
-    try:
-        client = MongoClient(MONGO_URI)
-        db = client[DB_NAME]
-        collection = db[COLLECTION_NAME]
-        result = collection.insert_one(st.session_state.matjip_data)
-        client.close()
-        st.success(f"데이터 업로드 완료! 문서 ID: {result.inserted_id}")
-    except Exception as e:
-        st.error(f"데이터 업로드 중 오류 발생: {e}")
-
-
-    if st.button("MongoDB 연결 테스트"):
+    # 업로드 버튼 (데이터 확인 후만 표시)
+    if st.button("MongoDB 업로드"):
         try:
-            client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-            # 서버 정보 확인 시도 (실제 연결 테스트)
-            client.server_info()
-            st.success("✅ MongoDB 서버에 정상 연결되었습니다!")
+            client = MongoClient(MONGO_URI)
+            db = client[DB_NAME]
+            collection = db[COLLECTION_NAME]
+            result = collection.insert_one(matjip_data)
             client.close()
+            st.success(f"데이터 업로드 완료! 문서 ID: {result.inserted_id}")
         except Exception as e:
-            st.error(f"❌ MongoDB 연결 실패: {e}")
+            st.error(f"데이터 업로드 중 오류 발생: {e}")
