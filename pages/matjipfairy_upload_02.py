@@ -35,10 +35,12 @@ summary_menu = st.text_input("메뉴 요약", key="summary_menu_input")
 link = st.text_input("링크", key="link_input")
 station = st.text_input("주변 역", key="station_input")
 
-# 데이터 확인
+# ============================
+# 1️⃣ 데이터 확인 버튼
+# ============================
 if st.button("데이터 확인"):
     fixed_address = address.replace(" District", "-gu")
-    
+
     st.session_state.matjip_data = {
         "restaurant_name": restaurant_name,
         "restaurant_type": restaurant_type,
@@ -51,18 +53,28 @@ if st.button("데이터 확인"):
         "link": link,
         "station": station
     }
-    
+
     st.json(st.session_state.matjip_data)
     st.info("데이터를 한번 더 확인한 후, 아래 버튼으로 업로드 해주세요.")
 
-    # 업로드 버튼 (데이터 확인 후만 표시)
+# ============================
+# 2️⃣ 업로드 버튼 (데이터 확인 후 표시)
+# ============================
+if st.session_state.matjip_data is not None:
     if st.button("DB 업로드"):
         try:
             client = MongoClient(MONGO_URI)
             db = client[DB_NAME]
             collection = db[COLLECTION_NAME]
-            result = collection.insert_one(matjip_data)
+
+            result = collection.insert_one(st.session_state.matjip_data)
+
             client.close()
+
             st.success(f"데이터 업로드 완료! 문서 ID: {result.inserted_id}")
+
+            # 업로드 후 세션 클리어 (선택사항)
+            # st.session_state.matjip_data = None
+
         except Exception as e:
             st.error(f"데이터 업로드 중 오류 발생: {e}")
