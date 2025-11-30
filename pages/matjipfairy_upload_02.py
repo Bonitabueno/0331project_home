@@ -77,5 +77,3 @@ if st.button("MongoDB 연결 테스트"):
         client.close()
     except Exception as e:
         st.error(f"❌ MongoDB 연결 실패: {e}")
-
-st.write("현재 MongoDB URI:", os.getenv("MONGO_URI"))
