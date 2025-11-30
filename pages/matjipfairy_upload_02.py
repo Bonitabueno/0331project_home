@@ -63,13 +63,14 @@ if st.button("데이터 확인"):
 if st.session_state.matjip_data is not None:
     if st.button("DB 업로드"):
         try:
-            client = MongoClient(MONGO_URI)
-            db = client[DB_NAME]
-            collection = db[COLLECTION_NAME]
+            with st.spinner("업로드 중..."):
+                client = MongoClient(MONGO_URI)
+                db = client[DB_NAME]
+                collection = db[COLLECTION_NAME]
 
-            result = collection.insert_one(st.session_state.matjip_data)
+                result = collection.insert_one(st.session_state.matjip_data)
 
-            client.close()
+                client.close()
 
             st.success(f"데이터 업로드 완료! 문서 ID: {result.inserted_id}")
 
@@ -90,7 +91,7 @@ if st.session_state.matjip_data is not None:
                 if key in st.session_state:
                     del st.session_state[key]
 
-            st.rerun()
+            st.rerun()  # 페이지 초기화
 
         except Exception as e:
             st.error(f"데이터 업로드 중 오류 발생: {e}")
