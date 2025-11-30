@@ -91,7 +91,5 @@ if st.session_state.matjip_data is not None:
                 if key in st.session_state:
                     del st.session_state[key]
 
-            st.rerun()  # 페이지 초기화
-
         except Exception as e:
             st.error(f"데이터 업로드 중 오류 발생: {e}")
