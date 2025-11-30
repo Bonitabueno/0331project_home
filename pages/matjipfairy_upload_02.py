@@ -53,7 +53,6 @@ if st.button("데이터 확인"):
     }
     
     st.json(st.session_state.matjip_data)
-    st.success("데이터 확인 완료. 업로드 버튼을 눌러주세요.")
 
 # 업로드 버튼
 if st.session_state.matjip_data and st.button("MongoDB 업로드"):
