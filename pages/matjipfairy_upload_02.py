@@ -60,7 +60,7 @@ if st.button("데이터 확인"):
 # ============================
 # 2️⃣ 업로드 버튼 (데이터 확인 후 표시)
 # ============================
-if "matjip_data" in st.session_state and st.session_state.matjip_data:
+if st.session_state.matjip_data is not None:
     if st.button("DB 업로드"):
         try:
             client = MongoClient(MONGO_URI)
