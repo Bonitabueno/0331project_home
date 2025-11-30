@@ -1,5 +1,8 @@
 import streamlit as st
 from common_module.styles import apply_placeholder_style
+from dotenv import load_dotenv
+import os
+import json
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
@@ -7,7 +10,8 @@ st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊
 # CSS 설정
 apply_placeholder_style()
 
-# 데이터베이스&데이터 컬렉션 설정
+# 데이터베이스 & 데이터 컬렉션 설정
+MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = "matjip_db"
 COLLECTION_NAME = "matjip_info"
 
