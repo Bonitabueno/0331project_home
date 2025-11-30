@@ -73,5 +73,24 @@ if st.session_state.matjip_data is not None:
 
             st.success(f"데이터 업로드 완료! 문서 ID: {result.inserted_id}")
 
+            # 업로드 완료 후 모든 입력 필드 + matjip_data 초기화
+            for key in [
+                "restaurant_name_input",
+                "restaurant_type_input",
+                "city_input",
+                "district_input",
+                "neighborhood_input",
+                "address_input",
+                "menu_input",
+                "summary_menu_input",
+                "link_input",
+                "station_input",
+                "matjip_data",
+            ]:
+                if key in st.session_state:
+                    del st.session_state[key]
+
+            st.rerun()
+
         except Exception as e:
             st.error(f"데이터 업로드 중 오류 발생: {e}")
