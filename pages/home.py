@@ -12,9 +12,6 @@ st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊
 cookies = init_cookies()
 admin_id = check_login(cookies)
 
-# 아이디별 접근 페이지 설정
-allowed_pages = ALLOWED_ADMINS_0331.get(admin_id, [])
-
 # 사용자 컨테이너 (문구 + 로그아웃 버튼)
 container = st.container(border=True)
 container.write(f"{admin_id}님 환영합니다.")
@@ -30,33 +27,37 @@ st.divider()
 # 컬럼 생성 : 현재 2개
 col1, col2, col3 = st.columns(3)
 
+
 with col1:
     container1 = st.container(border=True)
     with container1:
-        if "popuplive" in allowed_pages:
-            if st.button("팝업라이브"):
+        if st.button("팝업라이브"):
+            allowed_pages = ALLOWED_ADMINS.get(admin_id, [])
+            if "popuplive" in allowed_pages:
                 st.switch_page("pages/popuplive_main.py")
-        else:
-            st.button("관리자에게 권한을 요청하세요.", disabled=True)
+            else:
+                st.error("접근 권한이 없습니다. 관리자에게 문의하세요.")
 
 with col2:
     container2 = st.container(border=True)
     with container2:
-        if "post26" in allowed_pages:
-            if st.button("포스트26"):
-                st.write("페이지 준비중입니다.")
-        else:
-            st.button("관리자에게 권한을 요청하세요.", disabled=True)
+        if st.button("포스트26"):
+            allowed_pages = ALLOWED_ADMINS.get(admin_id, [])
+            if "post26" in allowed_pages:
+                st.switch_page("pages/post26_main.py")
+            else:
+                st.error("접근 권한이 없습니다. 관리자에게 문의하세요.")
 
 with col3:
-    container2 = st.container(border=True)
-    with container2:
-        if "matjipfairy" in allowed_pages:
-            if st.button("맛집요정"):
+    container3 = st.container(border=True)
+    with container3:
+        if st.button("맛집요정"):
+            allowed_pages = ALLOWED_ADMINS.get(admin_id, [])
+            if "matjipfairy" in allowed_pages:
                 st.switch_page("pages/matjipfairy_main.py")
-        else:
-            st.button("관리자에게 권한을 요청하세요.", disabled=True)
-            
+            else:
+                st.error("접근 권한이 없습니다. 관리자에게 문의하세요.")
+
 # 구분선
 st.divider()
 
