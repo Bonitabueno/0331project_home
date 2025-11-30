@@ -27,7 +27,7 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
     district_candidates = [p for p in parts if p.endswith("-gu") or p.endswith("-si")]
 
     # city 후보
-    special_cities = ["Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju", "Ulsan", "Sejong"]
+    special_cities = ["Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju", "Ulsan", "Sejong-si"]
     city_candidates = []
     for p in reversed(parts):
         if p.endswith("-do"):
