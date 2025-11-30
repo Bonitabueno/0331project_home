@@ -68,12 +68,12 @@ if st.session_state.matjip_data and st.button("MongoDB 업로드"):
         st.error(f"데이터 업로드 중 오류 발생: {e}")
 
 
-if st.button("MongoDB 연결 테스트"):
-    try:
-        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-        # 서버 정보 확인 시도 (실제 연결 테스트)
-        client.server_info()
-        st.success("✅ MongoDB 서버에 정상 연결되었습니다!")
-        client.close()
-    except Exception as e:
-        st.error(f"❌ MongoDB 연결 실패: {e}")
+    if st.button("MongoDB 연결 테스트"):
+        try:
+            client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+            # 서버 정보 확인 시도 (실제 연결 테스트)
+            client.server_info()
+            st.success("✅ MongoDB 서버에 정상 연결되었습니다!")
+            client.close()
+        except Exception as e:
+            st.error(f"❌ MongoDB 연결 실패: {e}")
