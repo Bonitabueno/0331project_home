@@ -18,29 +18,44 @@ station = st.text_input("주변 역", key="station_input")
 
 
 def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, link, station):
-    parts = [p.strip() for p in addr.split(",") if p.strip() and "South Korea" not in p and not any(c.isdigit() for c in p)]
+    raw_parts = [p.strip() for p in addr.split(",") if p.strip()]
 
-    # neighborhood 추출
-    neighborhood = next((p for p in parts if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup")), "")
+    filtered_parts = []
+    for p in raw_parts:
+        if "South Korea" in p:
+            continue
+        if any(c.isdigit() for c in p):
+            continue
 
-    # district 후보
+        if p.lower() == "sejong-si":
+            filtered_parts.append("Sejong")
+        else:
+            filtered_parts.append(p)
+
+    parts = filtered_parts
+
+    neighborhood = next(
+        (p for p in parts if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup")),
+        ""
+    )
+
     district_candidates = [p for p in parts if p.endswith("-gu") or p.endswith("-si")]
 
-    # city 후보
-    special_cities = ["Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju", "Ulsan", "Sejong-si"]
+    special_cities = ["Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju", "Ulsan", "Sejong"]
+
     city_candidates = []
     for p in reversed(parts):
-        if p.endswith("-do"):
+        if p in special_cities:
             city_candidates.append(p)
-        elif p in special_cities:
-            city_candidates.append(p)
+        elif p.endswith("-do"):
+            city_candidates.append(p.replace("-do", "").strip())
         elif p.endswith("-si") and p not in district_candidates:
-            city_candidates.append(p)
+            city_candidates.append(p.split("-")[0].strip())
 
-    # 1차: 일반 조합 생성
     results = []
-    for city in city_candidates:
-        for district in district_candidates:
+
+    for district in district_candidates:
+        for city in city_candidates:
             results.append({
                 "restaurant_name": restaurant_name,
                 "restaurant_type": restaurant_type,
@@ -54,33 +69,16 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
                 "station": station
             })
 
-    # 2차: 도+시+구+동 특수 중첩 처리
-    # 도, 시, 구, 동 패턴만 해당
-    do_candidates = [p for p in parts if p.endswith("-do")]
-    si_candidates = [p for p in parts if p.endswith("-si")]
-    gu_candidates = [p for p in parts if p.endswith("-gu")]
+    unique_results = []
+    seen = set()
+    for r in results:
+        key = (r["city"], r["district"])
+        if key not in seen:
+            seen.add(key)
+            unique_results.append(r)
 
-    # 도, 시, 구, 동 모두 있는 경우
-    if do_candidates and si_candidates and gu_candidates and neighborhood:
-        do_name = do_candidates[0]
-        for si in si_candidates:
-            for gu in gu_candidates:
-                # 기존 결과에 없는 조합만 추가
-                if not any(r["city"] == si.split("-")[0] and r["district"] == gu for r in results):
-                    results.append({
-                        "restaurant_name": restaurant_name,
-                        "restaurant_type": restaurant_type,
-                        "city": si.split("-")[0],  # 시를 city로 이동
-                        "district": gu,
-                        "neighborhood": neighborhood,
-                        "address": addr,
-                        "menu": [m.strip() for m in menu.split(",") if m.strip()],
-                        "summary_menu": summary_menu,
-                        "link": link,
-                        "station": station
-                    })
+    return unique_results
 
-    return results
 
 if st.button("데이터 확인"):
     parsed_data = parse_address(address, restaurant_name, restaurant_type, menu, summary_menu, link, station)
