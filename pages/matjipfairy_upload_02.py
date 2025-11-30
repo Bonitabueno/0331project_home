@@ -60,7 +60,7 @@ if st.button("데이터 확인"):
 # ============================
 # 2️⃣ 업로드 버튼 (데이터 확인 후 표시)
 # ============================
-if st.session_state.matjip_data is not None:
+if "matjip_data" in st.session_state and st.session_state.matjip_data:
     if st.button("DB 업로드"):
         try:
             client = MongoClient(MONGO_URI)
@@ -72,9 +72,6 @@ if st.session_state.matjip_data is not None:
             client.close()
 
             st.success(f"데이터 업로드 완료! 문서 ID: {result.inserted_id}")
-
-            # 업로드 후 세션 클리어 (선택사항)
-            # st.session_state.matjip_data = None
 
         except Exception as e:
             st.error(f"데이터 업로드 중 오류 발생: {e}")
