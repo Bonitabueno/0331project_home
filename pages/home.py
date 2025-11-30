@@ -31,7 +31,7 @@ st.divider()
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    container2 = st.container(border=True)
+    container1 = st.container(border=True)
     with container1:
         if "popuplive" in allowed_pages:
             if st.button("팝업라이브"):
