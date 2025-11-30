@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_cookies_manager import EncryptedCookieManager
 from admin_module.login_management import init_cookies
 from admin_module.login_management import check_login
+from admin_module.allowed_admin import ALLOWED_ADMINS_0331
 import requests
 import pandas as pd
 
@@ -10,6 +11,9 @@ st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊
 
 cookies = init_cookies()
 admin_id = check_login(cookies)
+
+# 아이디별 접근 페이지 설정
+allowed_pages = ALLOWED_ADMINS.get(admin_id, [])
 
 # 사용자 컨테이너 (문구 + 로그아웃 버튼)
 container = st.container(border=True)
@@ -27,22 +31,31 @@ st.divider()
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    container1 = st.container(border=True)
+    container1 = st.container()
     with container1:
-        if st.button("팝업라이브"):
-            st.switch_page("pages/popuplive_main.py")
+        if "popuplive" in allowed_pages:
+            if st.button("팝업라이브"):
+                st.switch_page("pages/popuplive_main.py")
+        else:
+            st.button("관리자에게 권한을 요청하세요.", disabled=True)
 
 with col2:
     container2 = st.container(border=True)
     with container2:
-        if st.button("포스트26"):
-            st.write("페이지 준비중입니다.")
+        if "post26" in allowed_pages:
+            if st.button("포스트26"):
+                st.write("페이지 준비중입니다.")
+        else:
+            st.button("관리자에게 권한을 요청하세요.", disabled=True)
 
 with col3:
     container2 = st.container(border=True)
     with container2:
-        if st.button("맛집요정"):
-            st.switch_page("pages/matjipfairy_main.py")
+        if "matjipfairy" in allowed_pages:
+            if st.button("맛집요정"):
+                st.switch_page("pages/matjipfairy_main.py")
+        else:
+            st.button("관리자에게 권한을 요청하세요.", disabled=True)
             
 # 구분선
 st.divider()
@@ -74,5 +87,4 @@ with tab1:
     except Exception as e:
         st.error(f"❌ 상태 정보를 불러오는 데 실패했습니다: {str(e)}")
 
-    st.link_button("상태조회페이지", "https://status.cloudtype.io/ko")    
-
+    st.link_button("상태조회페이지", "https://status.cloudtype.io/ko")
