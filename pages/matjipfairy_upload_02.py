@@ -20,6 +20,7 @@ COLLECTION_NAME = "matjip_info"
 if "matjip_data" not in st.session_state:
     st.session_state.matjip_data = None
 
+# = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 st.subheader("식당/카페 정보 업로드")
 
