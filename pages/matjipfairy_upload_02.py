@@ -3,6 +3,7 @@ from common_module.styles import apply_placeholder_style
 from dotenv import load_dotenv
 import os
 import json
+from pymongo import MongoClient
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
@@ -28,10 +29,11 @@ summary_menu = st.text_input("메뉴 요약", key="summary_menu_input")
 link = st.text_input("링크", key="link_input")
 station = st.text_input("주변 역", key="station_input")
 
+# 데이터 확인
 if st.button("데이터 확인"):
     fixed_address = address.replace(" District", "-gu")
     
-    st.json({
+    st.session_state.matjip_data = {
         "restaurant_name": restaurant_name,
         "restaurant_type": restaurant_type,
         "city": city,
@@ -42,4 +44,19 @@ if st.button("데이터 확인"):
         "summary_menu": summary_menu,
         "link": link,
         "station": station
-    })
+    }
+    
+    st.json(st.session_state.matjip_data)
+    st.success("데이터 확인 완료. 업로드 버튼을 눌러주세요.")
+
+# 업로드 버튼
+if st.session_state.matjip_data and st.button("MongoDB 업로드"):
+    try:
+        client = MongoClient(MONGO_URI)
+        db = client[DB_NAME]
+        collection = db[COLLECTION_NAME]
+        result = collection.insert_one(st.session_state.matjip_data)
+        client.close()
+        st.success(f"데이터 업로드 완료! 문서 ID: {result.inserted_id}")
+    except Exception as e:
+        st.error(f"데이터 업로드 중 오류 발생: {e}")
