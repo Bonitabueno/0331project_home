@@ -18,26 +18,23 @@ station = st.text_input("주변 역", key="station_input")
 
 
 def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, link, station):
+    # 원본 구조 그대로 유지 + sejong-si → Sejong 예외 처리 추가
     raw_parts = [p.strip() for p in addr.split(",") if p.strip()]
 
-    filtered_parts = []
+    parts = []
     for p in raw_parts:
         if "South Korea" in p:
             continue
         if any(c.isdigit() for c in p):
             continue
 
+        # 세종 예외
         if p.lower() == "sejong-si":
-            filtered_parts.append("Sejong")
+            parts.append("Sejong")
         else:
-            filtered_parts.append(p)
+            parts.append(p)
 
-    parts = filtered_parts
-
-    neighborhood = next(
-        (p for p in parts if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup")),
-        ""
-    )
+    neighborhood = next((p for p in parts if p.endswith("-dong") or p.endswith("-ri") or p.endswith("-eup")), "")
 
     district_candidates = [p for p in parts if p.endswith("-gu") or p.endswith("-si")]
 
@@ -45,17 +42,16 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
 
     city_candidates = []
     for p in reversed(parts):
-        if p in special_cities:
+        if p.endswith("-do"):
             city_candidates.append(p)
-        elif p.endswith("-do"):
-            city_candidates.append(p.replace("-do", "").strip())
+        elif p in special_cities:
+            city_candidates.append(p)
         elif p.endswith("-si") and p not in district_candidates:
-            city_candidates.append(p.split("-")[0].strip())
+            city_candidates.append(p)
 
     results = []
-
-    for district in district_candidates:
-        for city in city_candidates:
+    for city in city_candidates:
+        for district in district_candidates:
             results.append({
                 "restaurant_name": restaurant_name,
                 "restaurant_type": restaurant_type,
@@ -69,15 +65,29 @@ def parse_address(addr, restaurant_name, restaurant_type, menu, summary_menu, li
                 "station": station
             })
 
-    unique_results = []
-    seen = set()
-    for r in results:
-        key = (r["city"], r["district"])
-        if key not in seen:
-            seen.add(key)
-            unique_results.append(r)
+    do_candidates = [p for p in parts if p.endswith("-do")]
+    si_candidates = [p for p in parts if p.endswith("-si")]
+    gu_candidates = [p for p in parts if p.endswith("-gu")]
 
-    return unique_results
+    if do_candidates and si_candidates and gu_candidates and neighborhood:
+        do_name = do_candidates[0]
+        for si in si_candidates:
+            for gu in gu_candidates:
+                if not any(r["city"] == si.split("-")[0] and r["district"] == gu for r in results):
+                    results.append({
+                        "restaurant_name": restaurant_name,
+                        "restaurant_type": restaurant_type,
+                        "city": si.split("-")[0],
+                        "district": gu,
+                        "neighborhood": neighborhood,
+                        "address": addr,
+                        "menu": [m.strip() for m in menu.split(",") if m.strip()],
+                        "summary_menu": summary_menu,
+                        "link": link,
+                        "station": station
+                    })
+
+    return results
 
 
 if st.button("데이터 확인"):
