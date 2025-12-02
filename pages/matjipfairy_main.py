@@ -27,8 +27,9 @@ with st.container(border=True):
             st.session_state["admin_id"] = None
             st.switch_page("app.py")
 
-st.divider()
+st.markdown("")
 st.markdown("**맛집요정 Global**")
+st.markdown("")
 
 # 컬럼 생성 : 현재 2개
 left_col, right_col = st.columns(2)
@@ -40,3 +41,4 @@ with right_col:
     st.link_button("PRD", "https://matjipfairy.netlify.app")
 
 st.divider()
+st.markdown("**맛집요정 Global**")
