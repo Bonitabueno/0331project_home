@@ -41,4 +41,6 @@ with right_col:
     st.link_button("PRD", "https://matjipfairy.netlify.app")
 
 st.divider()
-st.markdown("**맛집요정 Global**")
+st.markdown("**맛집요정 Korea**")
+st.divider()
+st.markdown("**맛집요정 Japan**")
