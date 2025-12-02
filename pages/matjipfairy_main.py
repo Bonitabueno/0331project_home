@@ -28,7 +28,7 @@ with st.container(border=True):
             st.switch_page("app.py")
 
 
-# 컬럼 생성 : 현재 2개
+# 컬럼 생성
 col1, col2 = st.columns(2)
 
 with col1:
@@ -46,8 +46,3 @@ with col2:
             st.switch_page("pages/matjipfairy_global_main.py")
         else:
             st.error("오류가 발생했습니다")
-
-st.divider()
-st.markdown("**맛집요정 Korea**")
-st.divider()
-st.markdown("**맛집요정 Japan**")
