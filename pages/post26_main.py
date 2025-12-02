@@ -1,4 +1,6 @@
 import streamlit as st
+from admin_module.login_management import init_cookies
+from admin_module.login_management import check_login
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="0331 Project", layout="wide", page_icon="📊")
