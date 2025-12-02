@@ -36,13 +36,9 @@ with col1:
     with container1:
         if st.button("Korea"):
             st.switch_page("pages/matjipfairy_korea_main.py")
-        else:
-            st.error("오류가 발생했습니다")
 
 with col2:
     container2 = st.container(border=True)
     with container2:
         if st.button("Global"):
             st.switch_page("pages/matjipfairy_global_main.py")
-        else:
-            st.error("오류가 발생했습니다")
