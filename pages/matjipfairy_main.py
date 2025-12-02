@@ -35,7 +35,7 @@ with col1:
     container1 = st.container(border=True)
     with container1:
         if st.button("Korea"):
-            st.switch_page("pages/popuplive_main.py")
+            st.switch_page("pages/matjipfairy_korea_main.py")
         else:
             st.error("오류가 발생했습니다")
 
@@ -43,7 +43,7 @@ with col2:
     container2 = st.container(border=True)
     with container2:
         if st.button("Global"):
-            st.switch_page("pages/post26_main.py")
+            st.switch_page("pages/matjipfairy_global_main.py")
         else:
             st.error("오류가 발생했습니다")
 
