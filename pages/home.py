@@ -27,7 +27,6 @@ st.divider()
 # 컬럼 생성 : 현재 2개
 col1, col2, col3 = st.columns(3)
 
-
 with col1:
     container1 = st.container(border=True)
     with container1:
