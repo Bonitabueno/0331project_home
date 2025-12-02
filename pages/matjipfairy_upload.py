@@ -4,9 +4,15 @@ from dotenv import load_dotenv
 import os
 import json
 from pymongo import MongoClient
+from admin_module.login_management import init_cookies
+from admin_module.login_management import check_login
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
+
+# 로그인 설정
+cookies = init_cookies()
+admin_id = check_login(cookies)
 
 # CSS 설정
 apply_placeholder_style()
@@ -36,7 +42,7 @@ link = st.text_input("링크", key="link_input")
 station = st.text_input("주변 역", key="station_input")
 
 # ============================
-# 1️⃣ 데이터 확인 버튼
+# 데이터 확인 버튼
 # ============================
 if st.button("데이터 확인"):
     fixed_address = address.replace(" District", "-gu")
@@ -58,7 +64,7 @@ if st.button("데이터 확인"):
     st.info("데이터를 한번 더 확인한 후, 아래 버튼으로 업로드 해주세요.")
 
 # ============================
-# 2️⃣ 업로드 버튼 (데이터 확인 후 표시)
+# 업로드 버튼 (데이터 확인 후 표시)
 # ============================
 if st.session_state.matjip_data is not None:
     if st.button("DB 업로드"):
