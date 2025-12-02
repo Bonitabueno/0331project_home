@@ -27,18 +27,25 @@ with st.container(border=True):
             st.session_state["admin_id"] = None
             st.switch_page("app.py")
 
-st.markdown("")
-st.markdown("**맛집요정 Global**")
-st.markdown("")
 
 # 컬럼 생성 : 현재 2개
-left_col, right_col = st.columns(2)
+col1, col2 = st.columns(2)
 
-with left_col:
-    st.link_button("STG", "https://port-0-matjip-fairy-global-mbrrqxp1539f7d68.sel4.cloudtype.app")
+with col1:
+    container1 = st.container(border=True)
+    with container1:
+        if st.button("Korea"):
+            st.switch_page("pages/popuplive_main.py")
+        else:
+            st.error("오류가 발생했습니다")
 
-with right_col:
-    st.link_button("PRD", "https://matjipfairy.netlify.app")
+with col2:
+    container2 = st.container(border=True)
+    with container2:
+        if st.button("Global"):
+            st.switch_page("pages/post26_main.py")
+        else:
+            st.error("오류가 발생했습니다")
 
 st.divider()
 st.markdown("**맛집요정 Korea**")
