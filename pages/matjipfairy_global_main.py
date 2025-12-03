@@ -9,7 +9,6 @@ st.set_page_config(page_title="0331 Project", layout="wide", page_icon="📊")
 cookies = init_cookies()
 admin_id = check_login(cookies)
 
-
 st.markdown("**맛집요정 Global**")
 
 # 사용자 컨테이너 (문구 + 로그아웃 버튼)
