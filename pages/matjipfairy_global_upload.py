@@ -30,6 +30,8 @@ if "matjip_data" not in st.session_state:
 
 st.subheader("식당/카페 정보 업로드")
 
+tab1, tab2, tab3 = st.tabs(["Cat", "Dog"])
+
 restaurant_name = st.text_input("식당명", key="restaurant_name_input")
 restaurant_type = st.text_input("업종", key="restaurant_type_input")
 city = st.text_input("특별시/광역시/도(City)", key="city_input")
