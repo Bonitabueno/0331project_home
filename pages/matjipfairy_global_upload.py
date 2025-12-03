@@ -4,15 +4,9 @@ from dotenv import load_dotenv
 import os
 import json
 from pymongo import MongoClient
-from admin_module.login_management import init_cookies
-from admin_module.login_management import check_login
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="0331 Project", layout="centered", page_icon="📊")
-
-# 로그인 설정
-cookies = init_cookies()
-admin_id = check_login(cookies)
 
 # CSS 설정
 apply_placeholder_style()
