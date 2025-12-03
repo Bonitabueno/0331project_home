@@ -41,7 +41,7 @@ with tab1:
     # ============================
     # 데이터 확인 버튼
     # ============================
-    if st.button("데이터 확인"):
+    if st.button("데이터 확인", key="Data_check"):
         fixed_address = address.replace(" District", "-gu")
 
         st.session_state.matjip_data = {
