@@ -100,17 +100,17 @@ with tab1:
 # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 with tab2:
-    restaurant_name = st.text_input("식당명", key="restaurant_name_input")
-    restaurant_type = st.text_input("업종", key="restaurant_type_input")
-    city = st.text_input("특별시/광역시/도(City)", key="city_input")
-    district = st.text_input("시/군/구(District)", key="district_input")
-    district2 = st.text_input("행정구(District2)", key="district2_input")
-    neighborhood = st.text_input("읍/면/동(Neighborhood)", key="neighborhood_input")
-    address = st.text_input("전체 주소", key="address_input")
-    menu = st.text_input("메뉴", placeholder ="여러 메뉴를 입력할 경우 쉼표로 구분해서 입력해주세요.", key="menu_input")
-    summary_menu = st.text_input("메뉴 요약", key="summary_menu_input")
-    link = st.text_input("링크", key="link_input")
-    station = st.text_input("주변 역", key="station_input")
+    restaurant_name = st.text_input("식당명", key="province_restaurant_name_input")
+    restaurant_type = st.text_input("업종", key="province_restaurant_type_input")
+    city = st.text_input("특별시/광역시/도(City)", key="province_city_input")
+    district = st.text_input("시/군/구(District)", key="province_district_input")
+    district2 = st.text_input("행정구(District2)", key="province_district2_input")
+    neighborhood = st.text_input("읍/면/동(Neighborhood)", key="province_neighborhood_input")
+    address = st.text_input("전체 주소", key="province_address_input")
+    menu = st.text_input("메뉴", placeholder ="여러 메뉴를 입력할 경우 쉼표로 구분해서 입력해주세요.", key="province_menu_input")
+    summary_menu = st.text_input("메뉴 요약", key="province_summary_menu_input")
+    link = st.text_input("링크", key="province_link_input")
+    station = st.text_input("주변 역", key="province_station_input")
 
     # ============================
     # 데이터 확인 버튼
@@ -154,18 +154,18 @@ with tab2:
 
                 # 업로드 완료 후 모든 입력 필드 + matjip_data 초기화
                 for key in [
-                    "restaurant_name_input",
-                    "restaurant_type_input",
-                    "city_input",
-                    "district_input",
-                    "district2_input",
-                    "neighborhood_input",
-                    "address_input",
-                    "menu_input",
-                    "summary_menu_input",
-                    "link_input",
-                    "station_input",
-                    "matjip_data",
+                    "province_restaurant_name_input",
+                    "province_restaurant_type_input",
+                    "province_city_input",
+                    "province_district_input",
+                    "province_district2_input",
+                    "province_neighborhood_input",
+                    "province_address_input",
+                    "province_menu_input",
+                    "province_summary_menu_input",
+                    "province_link_input",
+                    "province_station_input",
+                    "province_matjip_data",
                 ]:
                     if key in st.session_state:
                         del st.session_state[key]
