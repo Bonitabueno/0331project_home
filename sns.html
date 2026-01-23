@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X Demo Feed</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #e7e9ea;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .feed-container {
+            max-width: 600px;
+            width: 100%;
+            border-left: 1px solid #2f3336;
+            border-right: 1px solid #2f3336;
+            min-height: 100vh;
+        }
+
+        .compose {
+            padding: 12px 16px;
+            border-bottom: 1px solid #2f3336;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .compose-textarea {
+            background-color: #000000;
+            color: #e7e9ea;
+            border: none;
+            resize: none;
+            font-size: 20px;
+            line-height: 24px;
+            min-height: 56px;
+            outline: none;
+            overflow-y: auto;
+            max-height: 200px; /* 스크롤 생기도록 */
+        }
+
+        .compose-textarea::placeholder {
+            color: #71767b;
+        }
+
+        .compose-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        .post-button {
+            background-color: #1d9bf0;
+            color: #000000;
+            border: none;
+            border-radius: 9999px;
+            padding: 8px 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .post-button:hover {
+            background-color: #1a8cd8;
+        }
+
+        .post-button:disabled {
+            background-color: #0c4a6e;
+            cursor: not-allowed;
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tweet {
+            padding: 12px 16px;
+            border-bottom: 1px solid #2f3336;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tweet-content {
+            font-size: 15px;
+            line-height: 20px;
+            white-space: pre-wrap;
+        }
+
+        .tweet-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            color: #71767b;
+            font-size: 13px;
+        }
+
+        .action {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .action:hover {
+            color: #1d9bf0; /* 포인트 컬러로 hover */
+        }
+
+        .action svg {
+            width: 18.75px;
+            height: 18.75px;
+            margin-right: 4px;
+        }
+
+        .like.active {
+            color: #f91880;
+        }
+
+        .like.active:hover {
+            color: #f91880;
+        }
+    </style>
+</head>
+<body>
+    <div class="feed-container">
+        <div class="compose">
+            <textarea class="compose-textarea" placeholder="What is happening?!" rows="1"></textarea>
+            <div class="compose-actions">
+                <button class="post-button" disabled>Post</button>
+            </div>
+        </div>
+        <div class="feed"></div>
+    </div>
+
+    <script>
+        const textarea = document.querySelector('.compose-textarea');
+        const postButton = document.querySelector('.post-button');
+        const feed = document.querySelector('.feed');
+
+        // 자동 높이 조절 (但 max-height로 스크롤 생기게)
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = `${textarea.scrollHeight}px`;
+            postButton.disabled = textarea.value.trim() === '';
+        });
+
+        // 포스트 버튼 클릭
+        postButton.addEventListener('click', () => {
+            if (textarea.value.trim() === '') return;
+
+            const tweet = document.createElement('div');
+            tweet.classList.add('tweet');
+
+            const content = document.createElement('div');
+            content.classList.add('tweet-content');
+            content.textContent = textarea.value;
+
+            const actions = document.createElement('div');
+            actions.classList.add('tweet-actions');
+
+            // 댓글 아이콘
+            const reply = document.createElement('div');
+            reply.classList.add('action');
+            reply.innerHTML = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 4h-10v2h10V4zm-4 9v-2H4v2h6zm4-3H4v2h10v-2zm7-5h-5v14h5V5zm-2 12h-1v-2h1v2zm0-4h-1v-6h1v6z"/></svg>0`;
+
+            // 리트윗 아이콘
+            const retweet = document.createElement('div');
+            retweet.classList.add('action');
+            retweet.innerHTML = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M23 3h-3l-8 8-8-8H1l9 9-9 9h3l8-8 8 8h3l-9-9 9-9z"/></svg>0`;
+
+            // 좋아요 아이콘
+            const like = document.createElement('div');
+            like.classList.add('action', 'like');
+            like.innerHTML = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span class="like-count">0</span>`;
+
+            let likeCount = 0;
+            like.addEventListener('click', () => {
+                like.classList.toggle('active');
+                likeCount += like.classList.contains('active') ? 1 : -1;
+                like.querySelector('.like-count').textContent = likeCount;
+            });
+
+            // 조회수 아이콘
+            const views = document.createElement('div');
+            views.classList.add('action');
+            views.innerHTML = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>0`;
+
+            actions.appendChild(reply);
+            actions.appendChild(retweet);
+            actions.appendChild(like);
+            actions.appendChild(views);
+
+            tweet.appendChild(content);
+            tweet.appendChild(actions);
+
+            feed.prepend(tweet);
+            textarea.value = '';
+            postButton.disabled = true;
+            textarea.style.height = 'auto';
+        });
+    </script>
+</body>
+</html>
