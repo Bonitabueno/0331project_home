@@ -1,6 +1,0 @@
-streamlit
-streamlit-cookies-manager
-pytz
-redis
-pymongo
-python-dotenv
