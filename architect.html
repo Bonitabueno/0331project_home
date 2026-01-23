@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>건축 프로젝트 관리</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .column {
+      flex: 1;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px;
+    }
+
+    .column-title {
+      color: #FF5F00;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 12px;
+      margin-bottom: 15px;
+      background: white;
+      transition: all 0.3s;
+    }
+
+    .card.completed {
+      background-color: #E0F0FF;
+      /* 청사진 블루 */
+      border-color: #B3D9FF;
+    }
+
+    .add-btn {
+      background: #FF5F00;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+
+    .modal input {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .nav-btns {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 5px;
+      border: none;
+      border-radius: 3px;
+      background: #444;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 4개의 컬럼 구조 -->
+    <div class="column" id="planning">
+      <h2 class="column-title">기획 & 현장조사</h2>
+      <div class="cards"></div>
+      <button class="add-btn">+ 신규 프로젝트</button>
+    </div>
+
+    <div class="column" id="design">
+      <h2 class="column-title">도면 설계</h2>
+      <div class="cards"></div>
+      <button class="add-btn">+ 신규 프로젝트</button>
+    </div>
+
+    <div class="column" id="permit">
+      <h2 class="column-title">인허가 & 착공</h2>
+      <div class="cards"></div>
+      <button class="add-btn">+ 신규 프로젝트</button>
+    </div>
+
+    <div class="column" id="completion">
+      <h2 class="column-title">준공 & 감리</h2>
+      <div class="cards"></div>
+      <button class="add-btn">+ 신규 프로젝트</button>
+    </div>
+  </div>
+
+  <!-- 프로젝트 생성 모달 -->
+  <div id="projectModal" class="modal">
+    <h3>신규 프로젝트 생성</h3>
+    <input type="text" id="projectName" placeholder="프로젝트명">
+    <input type="text" id="ownerName" placeholder="건축주 성함">
+    <input type="text" id="location" placeholder="현장 위치">
+    <button onclick="createProject()">생성</button>
+    <button onclick="closeModal()">취소</button>
+  </div>
+
+  <script>
+    const columns = document.querySelectorAll('.column');
+    let currentModalColumn = null;
+
+    // 모달 열기
+    document.querySelectorAll('.add-btn').forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        currentModalColumn = columns[index];
+        document.getElementById('projectModal').style.display = 'block';
+      });
+    });
+
+    // 모달 닫기
+    function closeModal() {
+      document.getElementById('projectModal').style.display = 'none';
+      document.querySelectorAll('#projectModal input').forEach(input => input.value = '');
+    }
+
+    // 카드 생성
+    function createProject() {
+      const projectName = document.getElementById('projectName').value;
+      const ownerName = document.getElementById('ownerName').value;
+      const location = document.getElementById('location').value;
+
+      if (!projectName || !ownerName || !location) return;
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <strong>${projectName}</strong>
+        <p>건축주: ${ownerName}</p>
+        <p>위치: ${location}</p>
+        <div class="nav-btns">
+          <button class="nav-btn prev" onclick="moveCard(this, -1)">이전 단계</button>
+          <button class="nav-btn next" onclick="moveCard(this, 1)">다음 단계</button>
+        </div>
+      `;
+
+      currentModalColumn.querySelector('.cards').appendChild(card);
+      closeModal();
+    }
+
+    // 카드 이동 기능
+    function moveCard(btn, direction) {
+      const card = btn.closest('.card');
+      const currentColumn = card.closest('.column');
+      const currentIndex = Array.from(columns).indexOf(currentColumn);
+      const newIndex = currentIndex + direction;
+
+      if (newIndex < 0 || newIndex >= columns.length) return;
+
+      // 완료 단계 스타일 적용
+      if (newIndex === columns.length - 1) {
+        card.classList.add('completed');
+      } else {
+        card.classList.remove('completed');
+      }
+
+      columns[newIndex].querySelector('.cards').appendChild(card);
+    }
+  </script>
+</body>
+</html>
