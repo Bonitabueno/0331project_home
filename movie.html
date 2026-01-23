@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모바일 영화관 좌석 예매</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #090909;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .screen {
+            width: 200px;
+            height: 100px;
+            margin: 0 auto;
+            background-color: #1e5eff;
+            border-radius: 100px / 50px;
+            box-shadow: 0px 0px 50px rgba(255, 255, 255, 0.6);
+            margin-bottom: 30px;
+        }
+
+        .seat-map {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(6, 60px);
+            gap: 5px;
+            margin: 0 auto;
+            max-width: 470px;
+            padding: 10px;
+            background-color: #090909;
+            border-radius: 25px;
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .seat {
+            width: 50px;
+            height: 60px;
+            border-radius: 0 23px 5px 5px; // 아치형 의자
+            background-color: #666666; // 예매 가능
+            cursor: pointer;
+            transition: background-color 0.2s ease; // 부드러운 전환
+        }
+
+        .seat:hover {
+            background-color: #898989; // 마우스 오버
+        }
+
+        .seat.selected {
+            background-color: #71e143; // 형광 민트색(선택됨)
+        }
+
+        .seat.sold {
+            background-color: #4a4a4a;
+            opacity: 0.7; // 판매됨(투명도 70%)
+            pointer-events: none; // 클릭 금지
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .seat-info {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>영화관 좌석 예약</h1>
+        <div class="screen"></div>
+    </header>
+    <main>
+        <div class="seat-map"></div>
+    </main>
+    <div class="bottom-bar">
+        <div class="seat-info">
+            <p>선택한 좌석 수: <span id="seatCount">0</span></p>
+            <p>총 금액: <span id="totalPrice">0</span>원</p>
+        </div>
+    </div>
+
+    <script>
+        const SEATS_ROWS = 6;
+        const SEATS_COLS = 8;
+        const PRICE_PER_SEAT = 15000;
+        let selectedSeats = new Set();
+        let soldOutSeats = [];
+
+        function createSeats() {
+            const seatMap = document.querySelector('.seat-map');
+            for (let row = 0; row < SEATS_ROWS; row++) {
+                for (let col = 0; col < SEATS_COLS; col++) {
+                    const seat = document.createElement('div');
+                    seat.classList.add('seat');
+                    seat.dataset.seat = `${row}-${col}`; // 데이터 속성 추가
+                    seat.addEventListener('click', () => toggleSelected(seat));
+                    seatMap.appendChild(seat);
+                }
+            }
+        }
+
+        function toggleSelected(seat) {
+            if (seat.classList.contains('sold')) return;
+            seat.classList.toggle('selected');
+            if (seat.classList.contains('selected')) {
+                selectedSeats.add(seat.dataset.seat);
+            } else {
+                selectedSeats.delete(seat.dataset.seat);
+            }
+            updateTotalPrice();
+        }
+
+        function updateTotalPrice() {
+            const seatCountElement = document.getElementById('seatCount');
+            const totalPriceElement = document.getElementById('totalPrice');
+            seatCountElement.textContent = selectedSeats.size;
+            totalPriceElement.textContent = (selectedSeats.size * PRICE_PER_SEAT).toLocaleString('ko-KR');
+        }
+
+        function randmizeSoldSeats() {
+            const seats = document.querySelectorAll('.seat');
+            seats.forEach(seat => {
+                if (Math.random() < 0.2) {
+                    seat.classList.add('sold');
+                    soldOutSeats.push(seat);
+                }
+            });
+        }
+
+        // DOM이 완전히 로드된 후에 코드 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            createSeats();
+            randmizeSoldSeats();
+            updateTotalPrice();
+        });
+    </script>
+</body>
+</html>
