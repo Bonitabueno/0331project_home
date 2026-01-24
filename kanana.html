@@ -2,52 +2,75 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Sim Game</title>
+  <title>심즈 미니 웹게임</title>
   <style>
     body {
-      background: #222;
+      background: #181825;
       color: #fff;
       font-family: 'Pretendard', sans-serif;
+      margin: 0;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      margin: 0;
     }
-    .container {
-      background: #333;
-      border-radius: 18px;
-      padding: 32px 24px 24px 24px;
-      margin-top: 40px;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.2);
-      text-align: center;
+    #gameArea {
+      position: relative;
+      width: 480px;
+      height: 320px;
+      background: #263238;
+      border-radius: 16px;
+      margin-top: 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+      overflow: hidden;
     }
-    .sim-img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
+    .sim {
+      position: absolute;
+      width: 48px;
+      height: 48px;
       background: #FFD600;
-      margin-bottom: 16px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
-      color: #333;
+      font-size: 2.2rem;
       border: 3px solid #fff;
+      transition: left 0.1s, top 0.1s;
+      user-select: none;
     }
-    .status-bar {
-      margin: 16px 0;
+    .object {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+      background: #37474F;
+      border: 2px solid #FFD600;
     }
-    .bar-label {
-      font-size: 1rem;
-      margin-right: 6px;
+    #uiPanel {
+      width: 480px;
+      margin-top: 16px;
+      background: #23232f;
+      border-radius: 10px;
+      padding: 14px 22px;
+      display: flex;
+      gap: 24px;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.1rem;
     }
     .bar {
-      width: 200px;
-      height: 16px;
-      border-radius: 8px;
+      width: 90px;
+      height: 12px;
       background: #444;
-      margin-bottom: 8px;
+      border-radius: 6px;
+      margin-left: 6px;
       overflow: hidden;
       display: inline-block;
       vertical-align: middle;
@@ -59,107 +82,246 @@
     .happy { background: #FFD600; }
     .hunger { background: #FF6F00; }
     .energy { background: #64DD17; }
-    .actions button {
+    #gameover {
+      color: #FF5252;
+      font-weight: bold;
+      margin: 18px 0 0 0;
+    }
+    #createPanel {
+      margin-top: 48px;
+      background: #23232f;
+      border-radius: 14px;
+      padding: 30px 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+    #createPanel input {
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1.1rem;
+      margin-right: 8px;
+    }
+    #createPanel button {
       background: #FFD600;
       border: none;
       border-radius: 8px;
       color: #222;
       padding: 8px 24px;
-      margin: 8px;
       font-size: 1rem;
       cursor: pointer;
-      transition: background .2s;
-    }
-    .actions button:hover { background: #FFEA00; }
-    .game-over {
-      color: #FF5252;
-      font-weight: bold;
-      margin-top: 18px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="sim-img">😊</div>
-    <h2>심즈 미니 웹앱</h2>
-    <div class="status-bar">
-      <div>
-        <span class="bar-label">행복</span>
-        <div class="bar"><div id="happyBar" class="bar-inner happy" style="width:100%"></div></div>
-      </div>
-      <div>
-        <span class="bar-label">배고픔</span>
-        <div class="bar"><div id="hungerBar" class="bar-inner hunger" style="width:100%"></div></div>
-      </div>
-      <div>
-        <span class="bar-label">에너지</span>
-        <div class="bar"><div id="energyBar" class="bar-inner energy" style="width:100%"></div></div>
-      </div>
-    </div>
-    <div class="actions">
-      <button onclick="eat()">🍔 밥 먹기</button>
-      <button onclick="sleep()">😴 잠 자기</button>
-      <button onclick="play()">🎮 놀기</button>
-    </div>
-    <div id="gameover" class="game-over" style="display:none;">게임 오버! 다시 새로고침 해주세요.</div>
+  <div id="createPanel">
+    <h2>캐릭터 생성</h2>
+    <input type="text" id="simName" placeholder="이름을 입력하세요" maxlength="8"/>
+    <button onclick="createSim()">시작하기</button>
   </div>
+  <div id="gameArea" style="display:none;">
+    <!-- 캐릭터, 오브젝트가 동적으로 생성됩니다 -->
+  </div>
+  <div id="uiPanel" style="display:none;">
+    <span id="simLabel"></span>
+    <span>행복
+      <span class="bar"><span id="happyBar" class="bar-inner happy" style="width:100%"></span></span>
+    </span>
+    <span>배고픔
+      <span class="bar"><span id="hungerBar" class="bar-inner hunger" style="width:100%"></span></span>
+    </span>
+    <span>에너지
+      <span class="bar"><span id="energyBar" class="bar-inner energy" style="width:100%"></span></span>
+    </span>
+  </div>
+  <div id="gameover" style="display:none;">게임 오버! 새로고침(F5)으로 재시작하세요.</div>
   <script>
-    let happy = 100;
-    let hunger = 100;
-    let energy = 100;
+    // 상태
+    let sim = {
+      name: "",
+      x: 200, y: 120,
+      size: 48,
+      happy: 100,
+      hunger: 100,
+      energy: 100
+    };
+    let isGameStarted = false;
     let isGameOver = false;
+    let moveSpeed = 12;
+    const areaW = 480, areaH = 320;
 
-    function updateBars() {
-      document.getElementById('happyBar').style.width = happy + '%';
-      document.getElementById('hungerBar').style.width = hunger + '%';
-      document.getElementById('energyBar').style.width = energy + '%';
-    }
+    // 오브젝트(침대, 식탁, TV) 정보
+    const objects = [
+      {type: 'bed', label: '침대', emoji: '🛏️', x: 30, y: 30, action: sleep},
+      {type: 'table', label: '식탁', emoji: '🍽️', x: 400, y: 40, action: eat},
+      {type: 'tv', label: 'TV', emoji: '📺', x: 210, y: 220, action: play}
+    ];
 
-    function checkGameOver() {
-      if (happy <= 0 || hunger <= 0 || energy <= 0) {
-        document.getElementById('gameover').style.display = 'block';
-        isGameOver = true;
+    // 캐릭터 생성
+    function createSim() {
+      const name = document.getElementById('simName').value.trim();
+      if (!name) {
+        alert('캐릭터 이름을 입력하세요!');
+        return;
       }
+      sim.name = name;
+      document.getElementById('simLabel').innerText = `👤 ${sim.name}`;
+      document.getElementById('createPanel').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'block';
+      document.getElementById('uiPanel').style.display = 'flex';
+      drawSim();
+      drawObjects();
+      updateBars();
+      isGameStarted = true;
     }
 
+    // 캐릭터 그리기
+    function drawSim() {
+      let simEl = document.getElementById('simChar');
+      if (!simEl) {
+        simEl = document.createElement('div');
+        simEl.id = 'simChar';
+        simEl.className = 'sim';
+        simEl.innerText = '😊';
+        document.getElementById('gameArea').appendChild(simEl);
+      }
+      simEl.style.left = sim.x + 'px';
+      simEl.style.top = sim.y + 'px';
+    }
+
+    // 오브젝트 그리기
+    function drawObjects() {
+      const area = document.getElementById('gameArea');
+      objects.forEach((obj, idx) => {
+        let objEl = document.getElementById('obj_' + obj.type);
+        if (!objEl) {
+          objEl = document.createElement('div');
+          objEl.id = 'obj_' + obj.type;
+          objEl.className = 'object';
+          objEl.title = obj.label;
+          objEl.innerText = obj.emoji;
+          objEl.style.left = obj.x + 'px';
+          objEl.style.top = obj.y + 'px';
+          objEl.addEventListener('click', () => {
+            if (isNear(obj)) obj.action();
+          });
+          area.appendChild(objEl);
+        }
+      });
+    }
+
+    // 이동
+    document.addEventListener('keydown', function(e) {
+      if (!isGameStarted || isGameOver) return;
+      let moved = false;
+      if (e.key === 'ArrowUp') {
+        if (sim.y - moveSpeed >= 0) { sim.y -= moveSpeed; moved = true;}
+      }
+      if (e.key === 'ArrowDown') {
+        if (sim.y + moveSpeed <= areaH - sim.size) { sim.y += moveSpeed; moved = true;}
+      }
+      if (e.key === 'ArrowLeft') {
+        if (sim.x - moveSpeed >= 0) { sim.x -= moveSpeed; moved = true;}
+      }
+      if (e.key === 'ArrowRight') {
+        if (sim.x + moveSpeed <= areaW - sim.size) { sim.x += moveSpeed; moved = true;}
+      }
+      if (moved) {
+        drawSim();
+        objects.forEach(obj => {
+          if (isNear(obj)) {
+            // 오브젝트 근처 도착시 안내
+            showHint(obj.label + ' [클릭]');
+          }
+        });
+      }
+    });
+
+    // 오브젝트 근처인지 판단
+    function isNear(obj) {
+      const dx = sim.x + sim.size/2 - (obj.x + 20);
+      const dy = sim.y + sim.size/2 - (obj.y + 20);
+      return Math.abs(dx) < 40 && Math.abs(dy) < 40;
+    }
+
+    // 상태바 업데이트
+    function updateBars() {
+      document.getElementById('happyBar').style.width = sim.happy + '%';
+      document.getElementById('hungerBar').style.width = sim.hunger + '%';
+      document.getElementById('energyBar').style.width = sim.energy + '%';
+    }
+
+    // 힌트 표시
+    function showHint(msg) {
+      let hint = document.getElementById('hint');
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.id = 'hint';
+        hint.style.position = 'absolute';
+        hint.style.bottom = '14px';
+        hint.style.left = '50%';
+        hint.style.transform = 'translateX(-50%)';
+        hint.style.background = '#FFD600';
+        hint.style.color = '#23232f';
+        hint.style.padding = '6px 18px';
+        hint.style.borderRadius = '10px';
+        hint.style.fontWeight = 'bold';
+        hint.style.fontSize = '1rem';
+        hint.style.zIndex = '10';
+        document.getElementById('gameArea').appendChild(hint);
+      }
+      hint.innerText = msg;
+      hint.style.display = 'block';
+      clearTimeout(hint.timer);
+      hint.timer = setTimeout(() => { hint.style.display = 'none'; }, 1200);
+    }
+
+    // 행동 함수들
     function eat() {
       if (isGameOver) return;
-      hunger = Math.min(hunger + 25, 100);
-      energy = Math.max(energy - 10, 0);
-      happy = Math.max(happy - 5, 0);
-      updateBars();
-      checkGameOver();
+      sim.hunger = Math.min(sim.hunger + 30, 100);
+      sim.energy = Math.max(sim.energy - 10, 0);
+      sim.happy = Math.min(sim.happy + 5, 100);
+      updateBars(); checkGameOver();
+      showHint('식사 완료!');
     }
-
     function sleep() {
       if (isGameOver) return;
-      energy = Math.min(energy + 35, 100);
-      hunger = Math.max(hunger - 15, 0);
-      happy = Math.max(happy - 10, 0);
-      updateBars();
-      checkGameOver();
+      sim.energy = Math.min(sim.energy + 35, 100);
+      sim.hunger = Math.max(sim.hunger - 15, 0);
+      sim.happy = Math.max(sim.happy - 5, 0);
+      updateBars(); checkGameOver();
+      showHint('꿀잠 완료!');
     }
-
     function play() {
       if (isGameOver) return;
-      happy = Math.min(happy + 20, 100);
-      energy = Math.max(energy - 20, 0);
-      hunger = Math.max(hunger - 10, 0);
-      updateBars();
-      checkGameOver();
+      sim.happy = Math.min(sim.happy + 25, 100);
+      sim.energy = Math.max(sim.energy - 20, 0);
+      sim.hunger = Math.max(sim.hunger - 10, 0);
+      updateBars(); checkGameOver();
+      showHint('즐겁게 놀았어요!');
     }
 
     // 상태 자연 감소
     setInterval(() => {
-      if (isGameOver) return;
-      happy = Math.max(happy - 1, 0);
-      hunger = Math.max(hunger - 1, 0);
-      energy = Math.max(energy - 1, 0);
+      if (!isGameStarted || isGameOver) return;
+      sim.happy = Math.max(sim.happy - 1, 0);
+      sim.hunger = Math.max(sim.hunger - 1, 0);
+      sim.energy = Math.max(sim.energy - 1, 0);
       updateBars();
       checkGameOver();
     }, 2000);
 
-    updateBars();
+    // 게임 오버 처리
+    function checkGameOver() {
+      if (sim.happy <= 0 || sim.hunger <= 0 || sim.energy <= 0) {
+        document.getElementById('gameover').style.display = 'block';
+        isGameOver = true;
+      }
+    }
   </script>
 </body>
 </html>
