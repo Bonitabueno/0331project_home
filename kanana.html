@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>말랑 젤리 스택 (Neo Fixed)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>말랑 젤리 스택 (Neo Final Fix)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     html, body {
       height: 100%; margin: 0; padding: 0;
@@ -60,6 +60,8 @@
       border: none; border-radius: 50px;
       box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
       cursor: pointer; transition: transform 0.1s;
+      /* 중요: 버튼은 터치 동작을 막지 않도록 설정 */
+      touch-action: manipulation;
     }
     .btn:active { transform: scale(0.95); }
     
@@ -107,7 +109,7 @@
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   
-  // 캔버스 해상도 최적화 (레티나 디스플레이 대응)
+  // 캔버스 해상도 최적화
   const dpr = window.devicePixelRatio || 1;
   let width, height;
 
@@ -150,17 +152,14 @@
       this.w = w;
       this.h = CONFIG.blockHeight;
       this.color = color;
-      // 애니메이션 상태
       this.scaleX = 1;
       this.scaleY = 1;
       this.animTime = 0;
     }
 
     draw() {
-      // Squash & Stretch 계산
       if (this.animTime > 0) {
-        const t = 1 - (this.animTime / 15); // 0 ~ 1
-        // 띠용 효과 (sin 파동)
+        const t = 1 - (this.animTime / 15);
         const intensity = 0.15 * Math.sin(t * Math.PI); 
         this.scaleX = 1 + intensity;
         this.scaleY = 1 - intensity;
@@ -171,20 +170,16 @@
       }
 
       ctx.save();
-      // 카메라 이동 적용
       ctx.translate(0, cameraY);
       
-      // 블록 중심 기준 스케일링
       const cx = this.x + this.w / 2;
       const cy = this.y + this.h / 2;
       ctx.translate(cx, cy);
       ctx.scale(this.scaleX, this.scaleY);
       ctx.translate(-cx, -cy);
 
-      // 젤리 그리기 (둥근 사각형)
       this.drawRoundedRect(this.x, this.y, this.w, this.h, 10, this.color);
       
-      // 하이라이트 (광택)
       ctx.fillStyle = 'rgba(255,255,255,0.3)';
       ctx.beginPath();
       ctx.ellipse(this.x + this.w*0.7, this.y + this.h*0.3, this.w*0.2, this.h*0.2, 0, 0, Math.PI*2);
@@ -207,7 +202,6 @@
       ctx.closePath();
       ctx.fillStyle = color;
       ctx.fill();
-      // 테두리 그림자
       ctx.strokeStyle = 'rgba(0,0,0,0.05)';
       ctx.lineWidth = 2;
       ctx.stroke();
@@ -215,10 +209,12 @@
   }
 
   function startGame() {
+    // UI 숨기기
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('gameover-screen').style.display = 'none';
-    titleEl.style.opacity = '0'; // 타이틀 숨김
+    titleEl.style.opacity = '0';
     
+    // 게임 변수 초기화
     blocks = [];
     score = 0;
     speed = CONFIG.startSpeed;
@@ -226,10 +222,9 @@
     isGameOver = false;
     scoreEl.innerText = score;
 
-    // 바닥 블록
     const baseBlock = new Block(
       (width - CONFIG.startWidth) / 2,
-      height - 100, // 바닥 위치
+      height - 100,
       CONFIG.startWidth,
       CONFIG.colors[0]
     );
@@ -242,11 +237,7 @@
   function spawnBlock() {
     const prevBlock = blocks[blocks.length - 1];
     const color = CONFIG.colors[blocks.length % CONFIG.colors.length];
-    
-    // 이전 블록 너비 그대로 유지
     currentBlock = new Block(0, prevBlock.y - CONFIG.blockHeight, prevBlock.w, color);
-    
-    // 시작 위치 (왼쪽 or 오른쪽)
     currentBlock.x = direction === 1 ? -currentBlock.w : width;
   }
 
@@ -255,30 +246,31 @@
     
     ctx.clearRect(0, 0, width, height);
 
-    // 블록 이동
     if (currentBlock) {
       currentBlock.x += speed * direction;
-      // 화면 밖으로 나가면 반향 전환 (튕기기)
       if (direction === 1 && currentBlock.x > width) direction = -1;
       else if (direction === -1 && currentBlock.x + currentBlock.w < 0) direction = 1;
     }
 
-    // 카메라 부드러운 이동 (블록이 쌓이면 화면 내려가기)
     const targetY = (blocks.length * CONFIG.blockHeight) > (height / 2) 
       ? (blocks.length * CONFIG.blockHeight) - (height / 2)
       : 0;
     cameraY += (targetY - cameraY) * 0.1;
 
-    // 그리기
     blocks.forEach(b => b.draw());
     if (currentBlock) currentBlock.draw();
 
     animationId = requestAnimationFrame(loop);
   }
 
-  // 액션 처리 (터치/클릭)
+  // 액션 핸들러 (버그 수정됨)
   function handleInput(e) {
-    // 1. 이벤트 중복 방지 (터치 후 마우스 이벤트 무시)
+    // [중요 수정] 버튼(Button)을 눌렀을 때는 게임 조작으로 인식하지 않고 리턴
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+      return; 
+    }
+
+    // 터치 이벤트의 경우, 브라우저 기본 동작(확대, 스크롤, 더블탭 등)을 막음
     if (e.cancelable) e.preventDefault();
     
     if (isGameOver || !currentBlock) return;
@@ -287,48 +279,38 @@
     const dist = currentBlock.x - prevBlock.x;
     const absDist = Math.abs(dist);
 
-    // 게임 오버 조건 (완전 빗나감)
     if (absDist >= currentBlock.w) {
       gameOver();
       return;
     }
 
-    // 성공 로직
     let newWidth = currentBlock.w;
     let newX = currentBlock.x;
 
-    // PERFECT 판정 (오차 5px 이내)
     if (absDist < 5) {
-      newX = prevBlock.x; // 딱 맞게 보정
+      newX = prevBlock.x;
       showPerfectEffect();
-      // 퍼펙트면 너비 안 줄어듬
     } else {
-      // 빗나간 만큼 잘라내기
       newWidth -= absDist;
-      if (dist > 0) newX = currentBlock.x; // 오른쪽으로 치우침
-      else newX = prevBlock.x; // 왼쪽으로 치우침
+      if (dist > 0) newX = currentBlock.x;
+      else newX = prevBlock.x;
     }
 
-    // 현재 블록 확정
     currentBlock.x = newX;
     currentBlock.w = newWidth;
-    currentBlock.animTime = 15; // 젤리 띠용 효과 시작
+    currentBlock.animTime = 15;
     blocks.push(currentBlock);
 
-    // 점수 증가
     score++;
     scoreEl.innerText = score;
-    
-    // 속도 증가
     speed += 0.2;
 
-    // 다음 블록
     spawnBlock();
   }
 
   function showPerfectEffect() {
     perfectEl.classList.remove('pop-anim');
-    void perfectEl.offsetWidth; // 리플로우 강제
+    void perfectEl.offsetWidth; 
     perfectEl.classList.add('pop-anim');
   }
 
@@ -342,19 +324,15 @@
     }, 500);
   }
 
-  // 이벤트 리스너 등록 (중복 방지 적용)
   const gameArea = document.getElementById('game-container');
   
-  // 모바일 터치 (가장 먼저 반응)
+  // 모바일 터치 (패시브 옵션 끔)
   gameArea.addEventListener('touchstart', handleInput, { passive: false });
-  // PC 클릭 (터치가 아닐 때만 반응하도록 브라우저가 알아서 처리하지만, preventDefault로 확실히 막음)
+  // PC 마우스 (터치가 아닐 때만)
   gameArea.addEventListener('mousedown', (e) => {
-    // 터치 디바이스에서 mousedown이 후행 발생하는 것 방지
-    // (touchstart에서 preventDefault() 했으면 여기까진 안 옴)
     handleInput(e);
   });
   
-  // 스페이스바
   window.addEventListener('keydown', (e) => {
     if (e.code === 'Space') handleInput(e);
   });
