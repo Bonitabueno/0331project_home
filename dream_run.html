@@ -7,6 +7,7 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background: #333; }
         canvas { display: block; margin: 0 auto; background: #f0f0f0; }
+        
         /* 폰트 및 UI 스타일 */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -18,24 +19,38 @@
             font-size: 24px; font-weight: bold; color: #ff5e89;
             text-shadow: 2px 2px 0 #fff;
             font-family: sans-serif;
+            display: none; /* 게임 시작 전엔 점수 숨김 */
         }
-        #game-over-screen {
+        
+        /* 공통 팝업 스타일 (시작 화면 & 게임오버) */
+        .popup-screen {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
             background: rgba(255, 255, 255, 0.95);
-            padding: 30px 50px;
+            padding: 40px 60px;
             border-radius: 20px;
             border: 5px solid #ff5e89;
-            display: none; /* 평소엔 숨김 */
-            pointer-events: auto; /* 버튼 클릭 가능하게 */
+            pointer-events: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 80%;
+            max-width: 300px;
         }
+
+        #start-screen { display: block; } /* 처음에 보임 */
+        #game-over-screen { display: none; } /* 처음에 숨김 */
+
+        h1, h2 { color: #ff5e89; margin: 0 0 20px 0; }
+        p { font-size: 16px; color: #555; margin-bottom: 20px; line-height: 1.5; }
+        
         button {
             background: #ff5e89; color: white; border: none;
-            padding: 15px 30px; font-size: 18px; border-radius: 50px;
-            cursor: pointer; font-weight: bold; margin-top: 10px;
+            padding: 15px 40px; font-size: 20px; border-radius: 50px;
+            cursor: pointer; font-weight: bold; 
+            transition: transform 0.1s;
         }
-        button:hover { background: #ff3366; }
+        button:hover { background: #ff3366; transform: scale(1.05); }
+        button:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -44,66 +59,70 @@
         <div id="score-board">점수: <span id="score-val">0</span></div>
     </div>
 
-    <div id="game-over-screen">
-        <h2 style="color:#ff5e89; margin:0 0 10px 0;">꿈에서 깼어요!</h2>
+    <div id="start-screen" class="popup-screen">
+        <h1>몽자의 드림런</h1>
+        <p>화면을 터치해서 점프!<br>맛있는 디저트 세상을 달려봐요.</p>
+        <button onclick="startGame()">게임 시작</button>
+    </div>
+
+    <div id="game-over-screen" class="popup-screen">
+        <h2>꿈에서 깼어요!</h2>
         <p>최종 점수: <span id="final-score">0</span></p>
-        <button onclick="resetGame()">다시 잠들기 (재시작)</button>
+        <button onclick="resetGame()">다시 잠들기</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // 1. 캔버스 및 기본 설정
+        // --- 1. 캔버스 및 기본 설정 ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
         let canvasWidth = window.innerWidth;
         let canvasHeight = window.innerHeight;
         
-        // PC에서도 모바일 비율 유지 (너무 넓어짐 방지)
         if(canvasWidth > 500) canvasWidth = 500; 
         
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
 
-        // 2. 이미지 에셋 로드 (가장 중요!)
+        // --- 2. 이미지 에셋 로드 ---
         const mongjaImg = new Image();
-        mongjaImg.src = './mongja.png'; // 몽자 이미지 경로
+        mongjaImg.src = './mongja.png';
         
         const bgImg = new Image();
-        bgImg.src = './bg.png'; // 배경 이미지 경로
+        bgImg.src = './bg.png';
 
-        // 3. 게임 변수
+        // --- 3. 게임 변수 ---
         let gameSpeed = 5;
         let score = 0;
         let isGameOver = false;
+        let isPlaying = false; // 게임 진행 중인지 여부
         let animationId;
 
-        // 몽자 (플레이어) 설정
+        // 몽자 (플레이어)
         const mongja = {
             x: 50,
-            y: canvasHeight - 150, // 바닥 기준 위치
-            width: 80,  // 몽자 크기 (필요시 수정)
+            y: canvasHeight - 150,
+            width: 80, 
             height: 80, 
-            dy: 0,      // 점프 속도
-            jumpPower: -13, // 점프 높이
-            gravity: 0.6,   // 중력
-            groundY: canvasHeight - 150, // 바닥 높이
+            dy: 0,
+            jumpPower: -13,
+            gravity: 0.6,
+            groundY: canvasHeight - 150,
             isJumping: false,
-            jumpCount: 0, // 2단 점프용
-            // 둥실둥실 효과용 변수
+            jumpCount: 0,
             bobTimer: 0 
         };
 
-        // 장애물 관리
         let obstacles = [];
         let frame = 0;
 
-        // 4. 입력 처리 (터치 & 클릭)
+        // --- 4. 입력 처리 ---
         function jump() {
-            if (isGameOver) return;
+            // 게임 중이 아니면 점프 안 함
+            if (!isPlaying || isGameOver) return;
 
-            // 2단 점프까지 허용
             if (mongja.jumpCount < 2) {
                 mongja.dy = mongja.jumpPower;
                 mongja.isJumping = true;
@@ -114,41 +133,179 @@
         window.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); }, {passive: false});
         window.addEventListener('keydown', (e) => { if(e.code === 'Space') jump(); });
 
-        // 5. 게임 로직 (업데이트 & 그리기)
+        // --- 5. 게임 로직 ---
         function update() {
-            if (isGameOver) return;
-            frame++;
+            if (!isPlaying || isGameOver) return; // 게임 중 아니면 멈춤
             
+            frame++;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>몽자의 드림런</title>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background: #333; }
+        canvas { display: block; margin: 0 auto; background: #f0f0f0; }
+        
+        /* 폰트 및 UI 스타일 */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* UI가 터치를 방해하지 않게 설정 */
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        #score-board {
+            padding: 20px;
+            font-size: 24px; font-weight: bold; color: #ff5e89;
+            text-shadow: 2px 2px 0 #fff;
+            font-family: sans-serif;
+            display: none; /* 게임 시작 전엔 점수 숨김 */
+        }
+        
+        /* 공통 팝업 스타일 (시작 화면 & 게임오버) */
+        .popup-screen {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 60px;
+            border-radius: 20px;
+            border: 5px solid #ff5e89;
+            pointer-events: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 80%;
+            max-width: 300px;
+        }
+
+        #start-screen { display: block; } /* 처음에 보임 */
+        #game-over-screen { display: none; } /* 처음에 숨김 */
+
+        h1, h2 { color: #ff5e89; margin: 0 0 20px 0; }
+        p { font-size: 16px; color: #555; margin-bottom: 20px; line-height: 1.5; }
+        
+        button {
+            background: #ff5e89; color: white; border: none;
+            padding: 15px 40px; font-size: 20px; border-radius: 50px;
+            cursor: pointer; font-weight: bold; 
+            transition: transform 0.1s;
+        }
+        button:hover { background: #ff3366; transform: scale(1.05); }
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <div id="score-board">점수: <span id="score-val">0</span></div>
+    </div>
+
+    <div id="start-screen" class="popup-screen">
+        <h1>몽자의 드림런</h1>
+        <p>화면을 터치해서 점프!<br>맛있는 디저트 세상을 달려봐요.</p>
+        <button onclick="startGame()">게임 시작</button>
+    </div>
+
+    <div id="game-over-screen" class="popup-screen">
+        <h2>꿈에서 깼어요!</h2>
+        <p>최종 점수: <span id="final-score">0</span></p>
+        <button onclick="resetGame()">다시 잠들기</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // --- 1. 캔버스 및 기본 설정 ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let canvasWidth = window.innerWidth;
+        let canvasHeight = window.innerHeight;
+        
+        if(canvasWidth > 500) canvasWidth = 500; 
+        
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        // --- 2. 이미지 에셋 로드 ---
+        const mongjaImg = new Image();
+        mongjaImg.src = '.mongja.png';
+        
+        const bgImg = new Image();
+        bgImg.src = './bg.png';
+
+        // --- 3. 게임 변수 ---
+        let gameSpeed = 5;
+        let score = 0;
+        let isGameOver = false;
+        let isPlaying = false; // 게임 진행 중인지 여부
+        let animationId;
+
+        // 몽자 (플레이어)
+        const mongja = {
+            x: 50,
+            y: canvasHeight - 150,
+            width: 80, 
+            height: 80, 
+            dy: 0,
+            jumpPower: -13,
+            gravity: 0.6,
+            groundY: canvasHeight - 150,
+            isJumping: false,
+            jumpCount: 0,
+            bobTimer: 0 
+        };
+
+        let obstacles = [];
+        let frame = 0;
+
+        // --- 4. 입력 처리 ---
+        function jump() {
+            // 게임 중이 아니면 점프 안 함
+            if (!isPlaying || isGameOver) return;
+
+            if (mongja.jumpCount < 2) {
+                mongja.dy = mongja.jumpPower;
+                mongja.isJumping = true;
+                mongja.jumpCount++;
+            }
+        }
+        window.addEventListener('mousedown', jump);
+        window.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); }, {passive: false});
+        window.addEventListener('keydown', (e) => { if(e.code === 'Space') jump(); });
+
+        // --- 5. 게임 로직 ---
+        function update() {
+            if (!isPlaying || isGameOver) return; // 게임 중 아니면 멈춤
+            
+            frame++;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // [배경 그리기] - 무한 스크롤
-            // 배경이 로드되었을 때만 그리기
+            // [배경]
             if (bgImg.complete) {
-                // 배경 속도 조절 (게임 속도의 절반)
                 let bgX = -(frame * (gameSpeed * 0.5)) % canvas.width;
                 ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
                 ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = "#FFEFF4"; // 배경 없을 때 기본색
+                ctx.fillStyle = "#FFEFF4";
                 ctx.fillRect(0,0, canvas.width, canvas.height);
             }
 
-            // [장애물 생성 및 이동]
-            if (frame % 120 === 0) { // 약 2초마다 생성
-                let obsHeight = Math.random() * 50 + 50; // 50~100 크기
+            // [장애물 생성]
+            if (frame % 120 === 0) { 
+                let obsHeight = Math.random() * 50 + 50;
                 obstacles.push({
                     x: canvas.width,
-                    y: mongja.groundY + (80 - obsHeight), // 바닥에 붙이기
+                    y: mongja.groundY + (80 - obsHeight),
                     width: 50,
                     height: obsHeight,
-                    color: '#FFB6C1' // 장애물 색 (이미지 대신 단순 도형)
+                    color: '#FFB6C1'
                 });
             }
 
             obstacles.forEach((obs, index) => {
                 obs.x -= gameSpeed;
-
-                // 장애물 그리기 (디저트 느낌의 둥근 박스)
+                
                 ctx.fillStyle = obs.color; 
                 ctx.beginPath();
                 ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 10);
@@ -157,7 +314,7 @@
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
-                // 충돌 감지
+                // 충돌 체크
                 if (
                     mongja.x < obs.x + obs.width &&
                     mongja.x + mongja.width > obs.x &&
@@ -167,7 +324,7 @@
                     gameOver();
                 }
 
-                // 화면 밖으로 나가면 삭제 및 점수 추가
+                // 점수 획득
                 if (obs.x + obs.width < 0) {
                     obstacles.splice(index, 1);
                     score++;
@@ -175,11 +332,10 @@
                 }
             });
 
-            // [몽자 움직임 처리]
-            mongja.dy += mongja.gravity; // 중력 적용
+            // [몽자 물리]
+            mongja.dy += mongja.gravity;
             mongja.y += mongja.dy;
 
-            // 바닥 충돌 체크
             if (mongja.y > mongja.groundY) {
                 mongja.y = mongja.groundY;
                 mongja.dy = 0;
@@ -187,20 +343,17 @@
                 mongja.jumpCount = 0;
             }
 
-            // [몽자 그리기] - 둥실둥실 효과 포함
+            // [몽자 그리기]
             if (mongjaImg.complete) {
                 let bobOffset = 0;
                 if (!mongja.isJumping) {
-                    // 점프 중이 아닐 때만 둥실거림 (sin 함수 이용)
                     mongja.bobTimer += 0.15;
-                    bobOffset = Math.sin(mongja.bobTimer) * 5; // 위아래 5px 이동
+                    bobOffset = Math.sin(mongja.bobTimer) * 5; 
                 } else {
-                    mongja.bobTimer = 0; // 점프하면 초기화
+                    mongja.bobTimer = 0;
                 }
-
                 ctx.drawImage(mongjaImg, mongja.x, mongja.y + bobOffset, mongja.width, mongja.height);
             } else {
-                // 이미지 없을 때 빨간 박스 (테스트용)
                 ctx.fillStyle = "red";
                 ctx.fillRect(mongja.x, mongja.y, mongja.width, mongja.height);
             }
@@ -208,14 +361,38 @@
             animationId = requestAnimationFrame(update);
         }
 
-        function gameOver() {
-            isGameOver = true;
-            document.getElementById('game-over-screen').style.display = 'block';
-            document.getElementById('final-score').innerText = score;
-            cancelAnimationFrame(animationId);
+        // --- 6. 게임 상태 관리 함수들 ---
+
+        // (1) 최초 실행 시: 대기 화면만 보여주고 루프는 돌리지 않음
+        function init() {
+            // 배경만 한번 그려주기 (깜빡임 방지)
+            ctx.fillStyle = "#FFEFF4";
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+            // 시작 화면 보이기
+            document.getElementById('start-screen').style.display = 'block';
+            document.getElementById('game-over-screen').style.display = 'none';
+            document.getElementById('score-board').style.display = 'none';
         }
 
+        // (2) 게임 시작 버튼 클릭 시
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('score-board').style.display = 'block';
+            resetGameVariables();
+            isPlaying = true;
+            update();
+        }
+
+        // (3) 재시작 버튼 클릭 시
         function resetGame() {
+            document.getElementById('game-over-screen').style.display = 'none';
+            resetGameVariables();
+            isPlaying = true;
+            update();
+        }
+
+        // 변수 초기화 (중복 제거용)
+        function resetGameVariables() {
             isGameOver = false;
             score = 0;
             frame = 0;
@@ -223,13 +400,153 @@
             mongja.y = mongja.groundY;
             mongja.dy = 0;
             document.getElementById('score-val').innerText = 0;
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            isPlaying = false;
+            document.getElementById('game-over-screen').style.display = 'block';
+            document.getElementById('final-score').innerText = score;
+            cancelAnimationFrame(animationId);
+        }
+
+        // 실행
+        init();
+
+    </script>
+</body>
+</html>
+            // [배경]
+            if (bgImg.complete) {
+                let bgX = -(frame * (gameSpeed * 0.5)) % canvas.width;
+                ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
+                ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = "#FFEFF4";
+                ctx.fillRect(0,0, canvas.width, canvas.height);
+            }
+
+            // [장애물 생성]
+            if (frame % 120 === 0) { 
+                let obsHeight = Math.random() * 50 + 50;
+                obstacles.push({
+                    x: canvas.width,
+                    y: mongja.groundY + (80 - obsHeight),
+                    width: 50,
+                    height: obsHeight,
+                    color: '#FFB6C1'
+                });
+            }
+
+            obstacles.forEach((obs, index) => {
+                obs.x -= gameSpeed;
+                
+                ctx.fillStyle = obs.color; 
+                ctx.beginPath();
+                ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 10);
+                ctx.fill();
+                ctx.strokeStyle = "#fff";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // 충돌 체크
+                if (
+                    mongja.x < obs.x + obs.width &&
+                    mongja.x + mongja.width > obs.x &&
+                    mongja.y < obs.y + obs.height &&
+                    mongja.y + mongja.height > obs.y
+                ) {
+                    gameOver();
+                }
+
+                // 점수 획득
+                if (obs.x + obs.width < 0) {
+                    obstacles.splice(index, 1);
+                    score++;
+                    document.getElementById('score-val').innerText = score;
+                }
+            });
+
+            // [몽자 물리]
+            mongja.dy += mongja.gravity;
+            mongja.y += mongja.dy;
+
+            if (mongja.y > mongja.groundY) {
+                mongja.y = mongja.groundY;
+                mongja.dy = 0;
+                mongja.isJumping = false;
+                mongja.jumpCount = 0;
+            }
+
+            // [몽자 그리기]
+            if (mongjaImg.complete) {
+                let bobOffset = 0;
+                if (!mongja.isJumping) {
+                    mongja.bobTimer += 0.15;
+                    bobOffset = Math.sin(mongja.bobTimer) * 5; 
+                } else {
+                    mongja.bobTimer = 0;
+                }
+                ctx.drawImage(mongjaImg, mongja.x, mongja.y + bobOffset, mongja.width, mongja.height);
+            } else {
+                ctx.fillStyle = "red";
+                ctx.fillRect(mongja.x, mongja.y, mongja.width, mongja.height);
+            }
+
+            animationId = requestAnimationFrame(update);
+        }
+
+        // --- 6. 게임 상태 관리 함수들 ---
+
+        // (1) 최초 실행 시: 대기 화면만 보여주고 루프는 돌리지 않음
+        function init() {
+            // 배경만 한번 그려주기 (깜빡임 방지)
+            ctx.fillStyle = "#FFEFF4";
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+            // 시작 화면 보이기
+            document.getElementById('start-screen').style.display = 'block';
             document.getElementById('game-over-screen').style.display = 'none';
+            document.getElementById('score-board').style.display = 'none';
+        }
+
+        // (2) 게임 시작 버튼 클릭 시
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('score-board').style.display = 'block';
+            resetGameVariables();
+            isPlaying = true;
             update();
         }
 
-        // 6. 시작!
-        // 이미지가 로드되든 안되든 일단 시작 (이미지 없으면 박스로라도 플레이 가능하게)
-        update();
+        // (3) 재시작 버튼 클릭 시
+        function resetGame() {
+            document.getElementById('game-over-screen').style.display = 'none';
+            resetGameVariables();
+            isPlaying = true;
+            update();
+        }
+
+        // 변수 초기화 (중복 제거용)
+        function resetGameVariables() {
+            isGameOver = false;
+            score = 0;
+            frame = 0;
+            obstacles = [];
+            mongja.y = mongja.groundY;
+            mongja.dy = 0;
+            document.getElementById('score-val').innerText = 0;
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            isPlaying = false;
+            document.getElementById('game-over-screen').style.display = 'block';
+            document.getElementById('final-score').innerText = score;
+            cancelAnimationFrame(animationId);
+        }
+
+        // 실행
+        init();
 
     </script>
 </body>
