@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>몽자의 드림런</title>
+<style>
+body {
+  margin: 0;
+  background: #f9f6ff;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+#gameCanvas {
+  display: block;
+  margin: 0 auto;
+  background: #ffeef7;
+  box-shadow: 0 4px 32px #c9b9e3;
+  touch-action: manipulation;
+}
+#restartBtn {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  font-size: 2.2rem;
+  background: #fff0fa;
+  color: #a179d5;
+  border: none;
+  border-radius: 1.5rem;
+  padding: 1rem 2.5rem;
+  box-shadow: 0 2px 12px #d9c7f5;
+  cursor: pointer;
+  z-index: 10;
+  display: none;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  transition: background 0.2s;
+}
+#restartBtn:active {
+  background: #f3e3ff;
+}
+#score {
+  position: absolute;
+  left: 2vw;
+  top: 2vh;
+  font-size: 1.8rem;
+  color: #a179d5;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  text-shadow: 0 2px 8px #fff;
+  user-select: none;
+  z-index: 5;
+}
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="score">0</div>
+<button id="restartBtn">재시작</button>
+<script>
+const W = 480, H = 720;
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let dpr = window.devicePixelRatio || 1;
+function resize() {
+  let baseW = W, baseH = H;
+  let ww = window.innerWidth, wh = window.innerHeight;
+  let scale = Math.min(ww / baseW, wh / baseH);
+  canvas.width = baseW * dpr;
+  canvas.height = baseH * dpr;
+  canvas.style.width = baseW * scale + "px";
+  canvas.style.height = baseH * scale + "px";
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+}
+resize();
+window.addEventListener('resize', resize);
+
+const bgImg = new Image();
+bgImg.src = './bg.png';
+const mongjaImg = new Image();
+mongjaImg.src = './mongja.png';
+
+const GROUND_Y = H - 120;
+const MONGJA = {
+  x: 70, y: GROUND_Y-120, w: 96, h: 96,
+  vy: 0,
+  isJumping: false,
+  jumpCount: 0,
+  BOB_FREQ: 2.5,
+  BOB_AMP: 10
+};
+const GRAVITY = 0.6;
+const JUMP_VY = -12.5;
+const DOUBLE_JUMP_VY = -10.5;
+const OBSTACLES = [];
+const OBSTACLE_INTERVAL = 1200;
+const OBSTACLE_SPEED = 5.5;
+const OBSTACLE_MIN_Y = GROUND_Y-50;
+const OBSTACLE_MAX_Y = GROUND_Y-110;
+const OBSTACLE_TYPES = [
+  {w: 56, h: 56, color: "#ffb6c1", shape: "circle"}, // 푸딩
+  {w: 72, h: 36, color: "#f9d390", shape: "rect"},   // 도넛
+  {w: 48, h: 72, color: "#cddcfa", shape: "rect"}    // 기타
+];
+let lastObsTime = 0;
+let bgScroll = 0;
+let score = 0;
+let playing = true;
+let gameOver = false;
+let startTime = 0;
+let showRestart = false;
+const restartBtn = document.getElementById('restartBtn');
+const scoreDiv = document.getElementById('score');
+
+function reset() {
+  MONGJA.y = GROUND_Y-120;
+  MONGJA.vy = 0;
+  MONGJA.isJumping = false;
+  MONGJA.jumpCount = 0;
+  OBSTACLES.length = 0;
+  lastObsTime = 0;
+  bgScroll = 0;
+  score = 0;
+  playing = true;
+  gameOver = false;
+  startTime = performance.now();
+  showRestart = false;
+  restartBtn.style.display = "none";
+  scoreDiv.textContent = 0;
+}
+function spawnObstacle() {
+  let type = OBSTACLE_TYPES[Math.floor(Math.random()*OBSTACLE_TYPES.length)];
+  let y = OBSTACLE_MIN_Y - Math.random() * (OBSTACLE_MIN_Y-OBSTACLE_MAX_Y);
+  OBSTACLES.push({
+    x: W + 30,
+    y: y,
+    w: type.w,
+    h: type.h,
+    color: type.color,
+    shape: type.shape,
+    passed: false
+  });
+}
+function drawBG() {
+  let imgW = bgImg.width||W, imgH = bgImg.height||H;
+  let loopW = imgW, x = -bgScroll % loopW;
+  for(let i=0; i<2; ++i)
+    ctx.drawImage(bgImg, x + i*loopW, 0, loopW, H);
+}
+function drawGround() {
+  ctx.fillStyle = "#ffeabf";
+  ctx.fillRect(0, GROUND_Y, W, H-GROUND_Y);
+  ctx.fillStyle = "#fff3e0";
+  ctx.fillRect(0, GROUND_Y+50, W, H-GROUND_Y-50);
+}
+function drawMongja(t) {
+  let bob = Math.sin(t*MONGJA.BOB_FREQ)*MONGJA.BOB_AMP;
+  let y = MONGJA.y;
+  if(!MONGJA.isJumping) y += bob;
+  ctx.save();
+  ctx.shadowColor = "#e0d4ff";
+  ctx.shadowBlur = 20;
+  ctx.drawImage(mongjaImg, MONGJA.x, y, MONGJA.w, MONGJA.h);
+  ctx.restore();
+  // 그림자
+  let shadowY = y + MONGJA.h - 8;
+  let shadowW = 46, shadowH = 13;
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  ctx.beginPath();
+  ctx.ellipse(MONGJA.x+MONGJA.w/2, shadowY, shadowW, shadowH, 0, 0, 2*Math.PI);
+  ctx.fillStyle = "#6a50a1";
+  ctx.fill();
+  ctx.restore();
+}
+function drawObstacles() {
+  for(let obs of OBSTACLES) {
+    ctx.save();
+    ctx.shadowColor = "#e2e2e2";
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = obs.color;
+    if(obs.shape==="circle") {
+      ctx.beginPath();
+      ctx.arc(obs.x+obs.w/2, obs.y+obs.h/2, obs.w/2, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.strokeStyle="#fff7fa";
+      ctx.lineWidth=4;
+      ctx.stroke();
+    } else {
+      ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+      ctx.strokeStyle="#fff7fa";
+      ctx.lineWidth=4;
+      ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+    }
+    ctx.restore();
+  }
+}
+function updateObstacles() {
+  for(let obs of OBSTACLES) obs.x -= OBSTACLE_SPEED;
+  while(OBSTACLES.length && OBSTACLES[0].x + OBSTACLES[0].w < 0)
+    OBSTACLES.shift();
+}
+function checkCollision() {
+  for(let obs of OBSTACLES) {
+    let mx = MONGJA.x+16, my = MONGJA.y+12, mw = MONGJA.w-32, mh = MONGJA.h-24;
+    let ox = obs.x, oy = obs.y, ow = obs.w, oh = obs.h;
+    if(mx < ox+ow && mx+mw > ox && my < oy+oh && my+mh > oy)
+      return true;
+  }
+  return false;
+}
+function updateScore() {
+  for(let obs of OBSTACLES) {
+    if(!obs.passed && obs.x+obs.w < MONGJA.x) {
+      obs.passed = true;
+      score++;
+      scoreDiv.textContent = score;
+    }
+  }
+}
+function jump() {
+  if(gameOver) return;
+  if(MONGJA.jumpCount<2) {
+    MONGJA.vy = MONGJA.jumpCount===0 ? JUMP_VY : DOUBLE_JUMP_VY;
+    MONGJA.isJumping = true;
+    MONGJA.jumpCount++;
+  }
+}
+function onPointerDown(e) {
+  if(!playing) return;
+  jump();
+}
+canvas.addEventListener('pointerdown', onPointerDown, {passive:false});
+canvas.addEventListener('touchstart', e=>e.preventDefault(), {passive:false}); // for iOS
+window.addEventListener('keydown', e=>{
+  if(e.code==="Space"||e.key===" "){
+    e.preventDefault();
+    jump();
+  }
+});
+restartBtn.onclick = ()=>{
+  reset();
+  requestAnimationFrame(gameLoop);
+};
+
+function gameLoop(now) {
+  if(!startTime) startTime = now;
+  let t = (now-startTime)/1000;
+  ctx.clearRect(0,0,W,H);
+  drawBG();
+  drawGround();
+  drawObstacles();
+  drawMongja(t);
+  if(playing) {
+    bgScroll += OBSTACLE_SPEED*0.8;
+    if(MONGJA.isJumping) {
+      MONGJA.y += MONGJA.vy;
+      MONGJA.vy += GRAVITY;
+      if(MONGJA.y >= GROUND_Y-120) {
+        MONGJA.y = GROUND_Y-120;
+        MONGJA.vy = 0;
+        MONGJA.isJumping = false;
+        MONGJA.jumpCount = 0;
+      }
+    }
+    if(now - lastObsTime > OBSTACLE_INTERVAL) {
+      spawnObstacle();
+      lastObsTime = now;
+    }
+    updateObstacles();
+    updateScore();
+    if(checkCollision()) {
+      playing = false;
+      gameOver = true;
+      showRestart = true;
+      restartBtn.style.display = "block";
+    }
+  }
+  if(!gameOver) requestAnimationFrame(gameLoop);
+}
+mongjaImg.onload = bgImg.onload = function() {
+  reset();
+  requestAnimationFrame(gameLoop);
+};
+if(mongjaImg.complete && bgImg.complete) {
+  reset();
+  requestAnimationFrame(gameLoop);
+}
+</script>
+</body>
+</html>
