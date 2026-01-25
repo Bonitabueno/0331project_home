@@ -5,101 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>몽자의 드림런</title>
     <style>
-        /* 1. 화면 전체 설정 (스크롤 방지) */
         html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* 스크롤바 제거 */
-            background-color: #333;
-            touch-action: none; /* 브라우저 기본 터치 동작(스크롤 등) 차단 -> 게임 반응속도 향상 */
-            -webkit-user-select: none; /* 텍스트 선택 방지 */
-            user-select: none;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #333;
+            touch-action: none; -webkit-user-select: none; user-select: none;
         }
-
-        /* 2. 캔버스: 화면 중앙 정렬 */
-        canvas {
-            display: block;
-            margin: 0 auto;
-            background-color: #f0f0f0;
-        }
-
-        /* 3. UI 레이어 (터치 통과하게 설정) */
+        canvas { display: block; margin: 0 auto; background-color: #f0f0f0; }
+        
         #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* 중요: 여기가 터치를 막지 않고 캔버스로 통과시킴 */
-            z-index: 10;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10;
         }
-
         #score-board {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #ff5e89;
-            text-shadow: 2px 2px 0 #fff;
-            font-family: sans-serif;
-            display: none;
+            position: absolute; top: 20px; left: 20px;
+            font-size: 24px; font-weight: bold; color: #ff5e89;
+            text-shadow: 2px 2px 0 #fff; font-family: sans-serif; display: none;
         }
 
-        /* 4. 팝업창 스타일 */
         .popup-screen {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            max-width: 320px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px 20px;
-            border-radius: 20px;
-            border: 5px solid #ff5e89;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            pointer-events: auto; /* 팝업창의 버튼은 터치 가능해야 함 */
-            z-index: 20;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; max-width: 320px; background: rgba(255, 255, 255, 0.95);
+            padding: 30px 20px; border-radius: 20px; border: 5px solid #ff5e89;
+            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            pointer-events: auto; z-index: 20; display: flex; flex-direction: column; align-items: center;
         }
-
-        #start-screen { display: flex; flex-direction: column; align-items: center; }
-        #game-over-screen { display: none; flex-direction: column; align-items: center; }
 
         h1 { font-size: 28px; color: #ff5e89; margin: 0 0 10px 0; }
         h2 { font-size: 24px; color: #ff5e89; margin: 0 0 10px 0; }
         p { font-size: 16px; color: #555; margin-bottom: 20px; line-height: 1.4; word-break: keep-all; }
-
-        /* 버튼 스타일 */
+        
         button {
-            background: #ff5e89;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
+            background: #ff5e89; color: white; border: none; padding: 15px 40px;
+            font-size: 20px; border-radius: 50px; cursor: pointer; font-weight: bold;
             box-shadow: 0 4px 10px rgba(255, 94, 137, 0.4);
-            transition: transform 0.1s, background 0.2s;
         }
-        button:hover { background: #ff3366; transform: scale(1.05); }
-        button:active { transform: scale(0.95); }
-
+        #game-over-screen { display: none; }
     </style>
 </head>
 <body>
-
     <div id="ui-layer">
         <div id="score-board">SCORE: <span id="score-val">0</span></div>
     </div>
 
     <div id="start-screen" class="popup-screen">
         <h1>몽자의 드림런</h1>
-        <p>화면을 터치해서 점프하세요!<br>장애물을 피해 디저트 나라를 달려요.</p>
+        <p>화면을 터치해서 점프!<br>디저트 나라를 달려봐요.</p>
         <button id="start-btn">게임 시작</button>
     </div>
 
@@ -112,72 +62,71 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // --- 1. 화면 설정 (모바일 최적화) ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 모바일 브라우저의 전체 화면 크기 가져오기
         let screenWidth = window.innerWidth;
         let screenHeight = window.innerHeight;
-
-        // 캔버스 크기 설정
         canvas.width = screenWidth;
         canvas.height = screenHeight;
 
-        // 리사이즈 대응 (가로/세로 모드 변경 시)
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            // 바닥 높이 재조정
             if(mongja) mongja.groundY = canvas.height - 150;
         });
 
-        // --- 2. 이미지 에셋 ---
         const mongjaImg = new Image();
         mongjaImg.src = './mongja.png';
         
         const bgImg = new Image();
         bgImg.src = './bg.png';
 
-        // --- 3. 게임 변수 ---
-        let gameSpeed = 5; // 속도 (모바일 화면에 맞춰 조정 가능)
+        // [핵심 수정] 배경 버퍼 캔버스 (거울모드 처리를 위해 미리 그려두는 곳)
+        let bgPatternCanvas = document.createElement('canvas');
+        let bgPatternCtx = bgPatternCanvas.getContext('2d');
+        let bgReady = false;
+
+        bgImg.onload = () => {
+            // 배경 캔버스의 너비를 화면 너비의 2배로 설정 (원본 + 반전본)
+            bgPatternCanvas.width = canvas.width * 2;
+            bgPatternCanvas.height = canvas.height;
+
+            // 1. 원본 그림 (왼쪽)
+            bgPatternCtx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+            // 2. 반전 그림 (오른쪽) - 여기가 거울 모드 핵심!
+            bgPatternCtx.save();
+            bgPatternCtx.scale(-1, 1); // 좌우 반전
+            // 좌표계가 뒤집혔으므로 x좌표를 음수로 계산해서 넣어야 함
+            bgPatternCtx.drawImage(bgImg, -canvas.width * 2, 0, canvas.width, canvas.height);
+            bgPatternCtx.restore();
+
+            bgReady = true;
+        };
+
+        let gameSpeed = 5;
         let score = 0;
         let isGameOver = false;
         let isPlaying = false;
         let animationId;
 
-        // 몽자 (플레이어)
         const mongja = {
-            x: screenWidth * 0.1, // 화면 왼쪽 10% 지점
+            x: screenWidth * 0.1, 
             y: screenHeight - 150,
-            width: 80, 
-            height: 120, 
-            dy: 0,
-            jumpPower: -15, // 점프력을 조금 더 높임
-            gravity: 0.7,
+            width: 80, height: 120, 
+            dy: 0, jumpPower: -15, gravity: 0.7,
             groundY: screenHeight - 150,
-            isJumping: false,
-            jumpCount: 0,
-            bobTimer: 0 
+            isJumping: false, jumpCount: 0, bobTimer: 0 
         };
 
         let obstacles = [];
         let frame = 0;
 
-        // --- 4. 터치/클릭 입력 처리 (여기가 핵심!) ---
-        
         function handleInput(e) {
-            // 버튼을 눌렀을 때는 점프하면 안 됨 (이벤트 버블링 방지 필요 시)
             if (e.target.tagName === 'BUTTON') return;
-
-            // 브라우저 기본 동작(스크롤, 확대 등) 막기 -> 게임 반응속도 UP
-            if (e.type === 'touchstart') {
-                e.preventDefault(); 
-            }
-
+            if (e.type === 'touchstart') e.preventDefault(); 
             if (!isPlaying || isGameOver) return;
-
-            // 점프 로직
             if (mongja.jumpCount < 2) {
                 mongja.dy = mongja.jumpPower;
                 mongja.isJumping = true;
@@ -185,79 +134,57 @@
             }
         }
 
-        // [중요] window 전체에 이벤트 리스너를 걸어서 어디를 눌러도 반응하게 함
-        // passive: false 옵션이 있어야 preventDefault()가 작동함 (모바일 필수)
         window.addEventListener('touchstart', handleInput, { passive: false });
         window.addEventListener('mousedown', handleInput);
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') handleInput(e);
-        });
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') handleInput(e); });
 
-        // 버튼 이벤트 연결
         document.getElementById('start-btn').addEventListener('click', startGame);
         document.getElementById('start-btn').addEventListener('touchstart', startGame);
-        
         document.getElementById('restart-btn').addEventListener('click', resetGame);
         document.getElementById('restart-btn').addEventListener('touchstart', resetGame);
 
-
-        // --- 5. 게임 로직 ---
         function update() {
             if (!isPlaying || isGameOver) return;
-            
             frame++;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // [배경]
-            if (bgImg.complete && bgImg.naturalWidth !== 0) {
-                // 배경 속도
-                let bgX = -(frame * (gameSpeed * 0.5)) % canvas.width;
-                // 끊김 없이 이어 붙이기
-                ctx.drawImage(bgImg, bgX, 0, canvas.width, canvas.height);
-                ctx.drawImage(bgImg, bgX + canvas.width, 0, canvas.width, canvas.height);
+            // [배경 그리기 - 거울모드 적용된 버퍼 사용]
+            if (bgReady) {
+                // 전체 너비는 canvas.width * 2
+                let totalWidth = canvas.width * 2;
+                let bgX = -(frame * (gameSpeed * 0.5)) % totalWidth;
+
+                // 2배 넓어진 이미지를 두 번 그려서 무한 스크롤 구현
+                ctx.drawImage(bgPatternCanvas, bgX, 0);
+                ctx.drawImage(bgPatternCanvas, bgX + totalWidth, 0);
             } else {
                 ctx.fillStyle = "#FFEFF4";
                 ctx.fillRect(0,0, canvas.width, canvas.height);
             }
 
-            // [장애물 생성]
-            if (frame % 150 === 0) { // 생성 간격
-                let obsHeight = Math.random() * 60 + 50; // 높이 랜덤
+            // [장애물]
+            if (frame % 150 === 0) {
+                let obsHeight = Math.random() * 60 + 50;
                 obstacles.push({
                     x: canvas.width,
-                    y: mongja.groundY + (80 - obsHeight), // 바닥 기준
-                    width: 50,
-                    height: obsHeight,
-                    color: '#FFB6C1'
+                    y: mongja.groundY + (80 - obsHeight),
+                    width: 50, height: obsHeight, color: '#FFB6C1'
                 });
             }
 
-            // [장애물 이동 및 충돌]
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 let obs = obstacles[i];
                 obs.x -= gameSpeed;
-
-                // 그리기
                 ctx.fillStyle = obs.color;
                 ctx.beginPath();
                 ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 10);
                 ctx.fill();
-                ctx.strokeStyle = "#fff";
-                ctx.lineWidth = 3;
-                ctx.stroke();
+                ctx.strokeStyle = "#fff"; ctx.lineWidth = 3; ctx.stroke();
 
-                // 충돌 체크 (Hit Box)
-                // 판정을 조금 너그럽게 하기 위해(여백) +10, -10 조정
-                if (
-                    mongja.x + 10 < obs.x + obs.width &&
-                    mongja.x + mongja.width - 10 > obs.x &&
-                    mongja.y + 10 < obs.y + obs.height &&
-                    mongja.y + mongja.height - 10 > obs.y
-                ) {
+                if (mongja.x + 10 < obs.x + obs.width && mongja.x + mongja.width - 10 > obs.x &&
+                    mongja.y + 10 < obs.y + obs.height && mongja.y + mongja.height - 10 > obs.y) {
                     gameOver();
                 }
-
-                // 점수 획득 및 삭제
                 if (obs.x + obs.width < 0) {
                     obstacles.splice(i, 1);
                     score++;
@@ -265,30 +192,17 @@
                 }
             }
 
-            // [몽자 물리 엔진]
+            // [몽자]
             mongja.dy += mongja.gravity;
             mongja.y += mongja.dy;
-
-            // 바닥 충돌
             if (mongja.y > mongja.groundY) {
-                mongja.y = mongja.groundY;
-                mongja.dy = 0;
-                mongja.isJumping = false;
-                mongja.jumpCount = 0;
+                mongja.y = mongja.groundY; mongja.dy = 0; mongja.isJumping = false; mongja.jumpCount = 0;
             }
 
-            // [몽자 그리기]
             if (mongjaImg.complete && mongjaImg.naturalWidth !== 0) {
-                let bobOffset = 0;
-                if (!mongja.isJumping) {
-                    mongja.bobTimer += 0.15;
-                    bobOffset = Math.sin(mongja.bobTimer) * 5; 
-                } else {
-                    mongja.bobTimer = 0;
-                }
+                let bobOffset = !mongja.isJumping ? Math.sin(mongja.bobTimer += 0.15) * 5 : (mongja.bobTimer = 0);
                 ctx.drawImage(mongjaImg, mongja.x, mongja.y + bobOffset, mongja.width, mongja.height);
             } else {
-                // 이미지 없을 때 대체 박스
                 ctx.fillStyle = "#FF5E89";
                 ctx.beginPath();
                 ctx.roundRect(mongja.x, mongja.y, mongja.width, mongja.height, 10);
@@ -298,59 +212,18 @@
             animationId = requestAnimationFrame(update);
         }
 
-        // --- 6. 게임 상태 함수 ---
-
         function init() {
-            // 초기 배경 그리기
             ctx.fillStyle = "#FFEFF4";
             ctx.fillRect(0,0, canvas.width, canvas.height);
-            
             document.getElementById('start-screen').style.display = 'flex';
-            document.getElementById('game-over-screen').style.display = 'none';
-            document.getElementById('score-board').style.display = 'none';
         }
 
-        function startGame(e) {
-            // 이벤트 전파 방지 (버튼 누르고 바로 점프되는 것 방지)
-            if(e) e.stopPropagation();
+        function startGame(e) { if(e) e.stopPropagation(); document.getElementById('start-screen').style.display = 'none'; document.getElementById('score-board').style.display = 'block'; resetValues(); isPlaying = true; update(); }
+        function resetGame(e) { if(e) e.stopPropagation(); document.getElementById('game-over-screen').style.display = 'none'; resetValues(); isPlaying = true; update(); }
+        function resetValues() { isGameOver = false; score = 0; frame = 0; obstacles = []; mongja.y = mongja.groundY; mongja.dy = 0; document.getElementById('score-val').innerText = 0; }
+        function gameOver() { isGameOver = true; isPlaying = false; document.getElementById('game-over-screen').style.display = 'flex'; document.getElementById('final-score').innerText = score; cancelAnimationFrame(animationId); }
 
-            document.getElementById('start-screen').style.display = 'none';
-            document.getElementById('score-board').style.display = 'block';
-            resetValues();
-            isPlaying = true;
-            update();
-        }
-
-        function resetGame(e) {
-             if(e) e.stopPropagation();
-
-            document.getElementById('game-over-screen').style.display = 'none';
-            resetValues();
-            isPlaying = true;
-            update();
-        }
-
-        function resetValues() {
-            isGameOver = false;
-            score = 0;
-            frame = 0;
-            obstacles = [];
-            mongja.y = mongja.groundY;
-            mongja.dy = 0;
-            document.getElementById('score-val').innerText = 0;
-        }
-
-        function gameOver() {
-            isGameOver = true;
-            isPlaying = false;
-            document.getElementById('game-over-screen').style.display = 'flex';
-            document.getElementById('final-score').innerText = score;
-            cancelAnimationFrame(animationId);
-        }
-
-        // 실행
         init();
-
     </script>
 </body>
 </html>
