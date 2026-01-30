@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ================================
     async function loadProjects() {
         try {
-            const response = await fetch('data/projects.json');
+            const response = await fetch('https://raw.githubusercontent.com/Bonitabueno/0331project/refs/heads/main/0331project_home/projects.json');
             if (!response.ok) {
                 throw new Error('Failed to load projects');
             }
@@ -321,3 +321,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // ================================
     loadProjects();
 });
+
