@@ -1,461 +1,163 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 통합 관리 어드민 (Powered by Clova & Neo)</title>
+    <title>0331 Project - PWA & Web Experience</title>
     
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        :root {
-            /* Neo's Color Palette */
-            --primary-color: #3b82f6; /* 세련된 블루 */
-            --primary-hover: #2563eb;
-            --background-dark: #111827; /* 더 깊은 다크 */
-            --surface-dark: #1f2937; /* 카드 배경 */
-            --text-main: #f3f4f6;
-            --text-sub: #9ca3af;
-            --border-color: #374151;
-            --success: #10b981;
-            --warning: #f59e0b;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Pretendard', sans-serif;
-        }
-
-        body {
-            background-color: var(--background-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-        }
-
-        /* 레이아웃 구조 */
-        .container {
-            display: grid;
-            grid-template-columns: 260px 1fr; /* 사이드바 폭 살짝 넓힘 */
-            min-height: 100vh;
-        }
-
-        /* 사이드바 */
-        .sidebar {
-            background: var(--surface-dark);
-            border-right: 1px solid var(--border-color);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            transition: transform 0.3s ease;
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sidebar ul {
-            list-style: none;
-        }
-
-        .sidebar li {
-            margin-bottom: 8px;
-        }
-
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: var(--text-sub);
-            text-decoration: none;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .sidebar a:hover, .sidebar a.active {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--primary-color);
-        }
-
-        .sidebar a i {
-            width: 24px;
-            margin-right: 10px;
-        }
-
-        /* 메인 영역 */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 헤더 */
-        .header {
-            height: 64px;
-            background: var(--surface-dark);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .current-time {
-            font-variant-numeric: tabular-nums; /* 숫자 너비 고정 */
-            color: var(--text-sub);
-            font-size: 0.9rem;
-        }
-
-        .hamburger {
-            display: none; /* PC에서는 숨김 */
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 1.25rem;
-            cursor: pointer;
-        }
-
-        .profile img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid var(--border-color);
-        }
-
-        /* 대시보드 콘텐츠 */
-        .dashboard-view {
-            padding: 24px;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        /* 카드 그리드 */
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .card {
-            background: var(--surface-dark);
-            padding: 24px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .card-title {
-            color: var(--text-sub);
-            font-size: 0.9rem;
-        }
-
-        .card-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        /* 테이블 섹션 */
-        .table-container {
-            background: var(--surface-dark);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-
-        .table-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .search-box {
-            background: var(--background-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 8px 12px;
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            white-space: nowrap;
-        }
-
-        th, td {
-            padding: 16px 24px;
-            text-align: left;
-        }
-
-        th {
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--text-sub);
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        tr:not(:last-child) {
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        /* 뱃지 스타일 */
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .badge-live { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-        .badge-dev { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-        .badge-server { background: rgba(59, 130, 246, 0.15); color: var(--primary-color); }
-
-        .btn-manage {
-            padding: 6px 12px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-manage:hover {
-            background: var(--primary-hover);
-        }
-
-        /* 모바일 반응형 */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                bottom: 0;
-                width: 260px;
-                transform: translateX(-100%); /* 기본적으로 숨김 */
-                box-shadow: 4px 0 24px rgba(0,0,0,0.5);
-            }
-
-            .sidebar.active {
-                transform: translateX(0); /* 활성화 시 보임 */
-            }
-
-            .hamburger {
-                display: block; /* 모바일에서만 보임 */
-            }
-            
-            /* 사이드바 열렸을 때 배경 어둡게 처리하는 오버레이 */
-            .overlay {
-                display: none;
-                position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0,0,0,0.5);
-                z-index: 90;
-            }
-            
-            .overlay.active {
-                display: block;
-            }
-        }
-    </style>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="statics/css/common.css">
+    <link rel="stylesheet" href="statics/css/home.css">
 </head>
 <body>
 
-    <div class="container">
-        <div class="overlay" onclick="toggleSidebar()"></div>
-
-        <nav class="sidebar">
-            <div class="logo">
-                <i class="fas fa-robot"></i> AI Admin
-            </div>
-            <ul>
-                <li><a href="#" class="active"><i class="fas fa-chart-pie"></i> 대시보드</a></li>
-                <li><a href="#"><i class="fas fa-layer-group"></i> 프로젝트</a></li>
-                <li><a href="#"><i class="fas fa-server"></i> 서버 모니터링</a></li>
-                <li><a href="#"><i class="fas fa-cog"></i> 설정</a></li>
-            </ul>
-        </nav>
-
-        <main class="main-content">
-            <header class="header">
-                <div class="header-left">
-                    <button class="hamburger" onclick="toggleSidebar()">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="current-time">
-                        <i class="far fa-clock"></i> <span id="clock-target">Loading...</span>
-                    </div>
-                </div>
-                <div class="profile">
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="Profile">
-                </div>
-            </header>
-
-            <div class="dashboard-view">
-                <div class="cards">
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Total Projects</span>
-                            <div class="card-icon"><i class="fas fa-folder"></i></div>
-                        </div>
-                        <div class="card-value">12</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Active Users</span>
-                            <div class="card-icon"><i class="fas fa-users"></i></div>
-                        </div>
-                        <div class="card-value">1,240</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">API Requests</span>
-                            <div class="card-icon"><i class="fas fa-globe"></i></div>
-                        </div>
-                        <div class="card-value">45.2K</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <span class="card-title">Server Status</span>
-                            <div class="card-icon"><i class="fas fa-heartbeat"></i></div>
-                        </div>
-                        <div class="badge badge-server">Healthy</div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Project List</h3>
-                        <input type="text" class="search-box" placeholder="Search...">
-                    </div>
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Project Name</th>
-                                    <th>URL</th>
-                                    <th>Status</th>
-                                    <th>PWA</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Admin Dashboard</strong></td>
-                                    <td>admin.ai-service.com</td>
-                                    <td><span class="badge badge-live">Live</span></td>
-                                    <td>O</td>
-                                    <td><button class="btn-manage">Manage</button></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Popup Store Map</strong></td>
-                                    <td>popuplive.kro.kr</td>
-                                    <td><span class="badge badge-live">Live</span></td>
-                                    <td>O</td>
-                                    <td><button class="btn-manage">Manage</button></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Stock Trading Bot</strong></td>
-                                    <td>internal-api</td>
-                                    <td><span class="badge badge-dev">Dev</span></td>
-                                    <td>X</td>
-                                    <td><button class="btn-manage">Manage</button></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Kanana Chat Web</strong></td>
-                                    <td>kanana-test</td>
-                                    <td><span class="badge badge-dev">Dev</span></td>
-                                    <td>O</td>
-                                    <td><button class="btn-manage">Manage</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <script>
-        // 시계 기능 (1초마다 갱신)
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            document.getElementById('clock-target').textContent = timeString;
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
-
-        // 사이드바 토글 기능
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.querySelector('.overlay');
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-number">0331</span>
+                <span class="logo-text">Project</span>
+            </a>
             
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link active">Home</a>
+                <a href="projects.html" class="nav-link">Projects</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
 
-        // 창 크기가 변경될 때 모바일 메뉴 초기화 (버그 방지)
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                document.querySelector('.sidebar').classList.remove('active');
-                document.querySelector('.overlay').classList.remove('active');
-            }
-        });
-    </script>
+            <button class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+            <div class="grid-overlay"></div>
+        </div>
+        
+        <div class="hero-content">
+            <div class="hero-label">WEB TO APP</div>
+            <h1 class="hero-title">
+                Next-Gen
+                <span class="gradient-text">Web Apps</span>
+                for All
+            </h1>
+            <p class="hero-subtitle">
+                Delivering a seamless user experience by transforming web into app. <br>
+                Optimizing performance across all devices through PWA technology.
+            </p>
+            <div class="hero-cta" style="justify-content: center;">
+                <a href="#featured" class="btn btn-secondary">
+                    Learn More
+                </a>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="featured-section" id="featured">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">PROJECTS</div>
+                <h2 class="section-title">Latest Work</h2>
+                <p class="section-subtitle">
+                    A list of our current live applications and ongoing developments.
+                </p>
+            </div>
+            <div class="projects-grid" id="featured-grid">
+                </div>
+
+            <div class="section-cta" style="text-align: center; margin-top: 60px;">
+                <a href="projects.html" class="btn btn-primary">
+                    View More
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content" data-aos="fade-right">
+                    <div class="section-label">OBJECTIVE</div>
+                    <h2 class="section-title">Focus on PWA</h2>
+                    <p class="about-text">
+                        0331 Project focuses on expanding web boundaries and delivering app-like experiences.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Web to App (PWA)</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Real-time Data Sync</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="native-section" id="native" style="background: var(--bg-primary); border-top: 1px solid var(--border-color); padding: 100px 0;">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content" data-aos="fade-left">
+                    <div class="section-label">MOBILE EXPANSION</div>
+                    <h2 class="section-title">App Market Presence</h2>
+                    <p class="about-text">
+                        We are bringing our digital experiences directly to your mobile device through major application stores.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <i class="fas fa-store"></i>
+                            <span>App Market Launch</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Native Android Optimization</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="logo-number">0331</span>
+                        <span class="logo-text">Project</span>
+                    </div>
+                    <p class="footer-tagline">Web to App, One project at a time.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 0331 Project. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="statics/js/navigation.js"></script>
+    <script src="statics/js/home.js"></script>
 </body>
 </html>
