@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Projects - 0331 Project</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="statics/css/common.css">
+    <link rel="stylesheet" href="statics/css/projects.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-number">0331</span>
+                <span class="logo-text">Project</span>
+            </a>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="projects.html" class="nav-link active">Projects</a>
+                <a href="index.html#about" class="nav-link">About</a>
+                <a href="index.html#contact" class="nav-link">Contact</a>
+            </div>
+
+            <button class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="header-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="grid-overlay"></div>
+        </div>
+        <div class="container">
+            <div class="header-content" data-aos="fade-up">
+                <div class="section-label">OUR PORTFOLIO</div>
+                <h1 class="page-title">All Projects</h1>
+                <p class="page-subtitle">
+                    From live services to experimental projects.<br>
+                    A comprehensive list of deployed services and active prototypes.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-tabs" data-aos="fade-up">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-grid"></i> All Projects
+                </button>
+                <button class="filter-btn" data-filter="live">
+                    <i class="fas fa-circle"></i> Live
+                </button>
+                <button class="filter-btn" data-filter="dev">
+                    <i class="fas fa-code"></i> In Development
+                </button>
+            </div>
+            <div class="search-container" data-aos="fade-up" data-aos-delay="100">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search projects..." class="search-input">
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Grid -->
+    <section class="projects-section">
+        <div class="container">
+            <!-- Loading State -->
+            <div class="loading-state" id="loadingState">
+                <div class="spinner"></div>
+                <p>Loading projects...</p>
+            </div>
+
+            <!-- Projects Grid (will be populated by JavaScript) -->
+            <div class="projects-grid" id="projectsGrid">
+                <!-- Projects will be dynamically loaded here -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-search fa-3x"></i>
+                <h3>No Projects Found</h3>
+                <p>Try adjusting your filters or search query</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-background">
+            <div class="gradient-orb orb-3"></div>
+            <div class="gradient-orb orb-4"></div>
+        </div>
+        <div class="container">
+            <div class="cta-content" data-aos="zoom-in">
+                <h2 class="cta-title">Have a Project in Mind?</h2>
+                <p class="cta-subtitle">
+                    Let's discuss how we can bring your ideas to life
+                </p>
+                <div class="cta-buttons">
+                    <a href="mailto:admin@0331project.com" class="btn btn-primary btn-large">
+                        Get in Touch
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                    <a href="index.html" class="btn btn-outline btn-large">
+                        Back to Home
+                        <i class="fas fa-home"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="logo-number">0331</span>
+                        <span class="logo-text">Project</span>
+                    </div>
+                    <p class="footer-tagline">Web to App, One project at a time.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Navigation</h4>
+                        <a href="index.html">Home</a>
+                        <a href="projects.html">Projects</a>
+                        <a href="index.html#about">About</a>
+                        <a href="index.html#contact">Contact</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Projects</h4>
+                        <a href="projects.html?filter=live">Live Projects</a>
+                        <a href="projects.html?filter=dev">In Development</a>
+                        <a href="projects.html">All Projects</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Connect</h4>
+                        <a href="mailto:admin@0331project.com">Email</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 0331 Project. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="statics/js/navigation.js"></script>
+    <script src="statics/js/projects.js"></script>
+</body>
+</html>
