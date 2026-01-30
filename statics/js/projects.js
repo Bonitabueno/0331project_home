@@ -1,11 +1,11 @@
 // ================================
-// HOME PAGE FUNCTIONALITY
+// PROJECTS PAGE FUNCTIONALITY
 // ================================
 
 document.addEventListener('DOMContentLoaded', function() {
     
     // ================================
-    // Initialize AOS (Animate On Scroll)
+    // Initialize AOS
     // ================================
     if (typeof AOS !== 'undefined') {
         AOS.init({
@@ -17,114 +17,272 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ================================
-    // Project Cards Hover Effect
+    // Global Variables
     // ================================
-    const projectCards = document.querySelectorAll('.project-card');
+    const projectsGrid = document.getElementById('projectsGrid');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const searchInput = document.getElementById('searchInput');
     
-    projectCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
+    let allProjects = [];
+    let currentFilter = 'all';
+    let currentSearch = '';
+    
+    // ================================
+    // Load Projects from JSON
+    // ================================
+    async function loadProjects() {
+        try {
+            const response = await fetch('data/projects.json');
+            if (!response.ok) {
+                throw new Error('Failed to load projects');
+            }
+            allProjects = await response.json();
+            renderProjects();
+            hideLoading();
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            showError();
+        }
+    }
+    
+    // ================================
+    // Render Projects
+    // ================================
+    function renderProjects() {
+        projectsGrid.innerHTML = '';
+        
+        let visibleCount = 0;
+        
+        allProjects.forEach((project, index) => {
+            const card = createProjectCard(project, index);
+            
+            // Apply filters
+            const categoryMatch = currentFilter === 'all' || project.status === currentFilter;
+            const searchMatch = currentSearch === '' || 
+                                project.title.toLowerCase().includes(currentSearch) || 
+                                project.description.toLowerCase().includes(currentSearch) ||
+                                project.tags.some(tag => tag.toLowerCase().includes(currentSearch));
+            
+            if (categoryMatch && searchMatch) {
+                projectsGrid.appendChild(card);
+                visibleCount++;
+            }
+        });
+        
+        // Show/hide empty state
+        if (visibleCount === 0) {
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+        }
+        
+        // Reinitialize AOS for new elements
+        if (typeof AOS !== 'undefined') {
+            AOS.refresh();
+        }
+    }
+    
+    // ================================
+    // Create Project Card Element
+    // ================================
+    function createProjectCard(project, index) {
+        const article = document.createElement('article');
+        article.className = 'project-card';
+        article.setAttribute('data-category', project.status);
+        article.setAttribute('data-aos', 'fade-up');
+        article.setAttribute('data-aos-delay', (index % 4) * 100);
+        
+        // [수정] status가 'dev'이거나, 링크가 없으면 비활성화 처리
+        const isDisabled = project.status === 'dev' || project.externalLink === '#' || !project.externalLink;
+        
+        const statusBadge = project.status === 'live' 
+            ? '<span class="badge badge-live"><i class="fas fa-circle"></i> Live</span>'
+            : '<span class="badge badge-dev"><i class="fas fa-code"></i> Dev</span>';
+        
+        const linkIcon = isDisabled 
+            ? '<i class="fas fa-lock"></i>'
+            : '<i class="fas fa-external-link-alt"></i>';
+        
+        const linkClass = isDisabled 
+            ? 'project-link project-link-disabled'
+            : 'project-link';
+        
+        const linkTarget = isDisabled ? '' : 'target="_blank"';
+        const linkTitle = isDisabled ? 'Coming Soon' : 'Visit Site';
+        const finalHref = isDisabled ? '#' : project.externalLink;
+        
+        article.innerHTML = `
+            <div class="project-image">
+                <div class="project-image-placeholder">
+                    <i class="fas ${project.icon} fa-3x"></i>
+                </div>
+            </div>
+            <div class="project-content">
+                <div class="project-header">
+                    <h3 class="project-title">${project.title}</h3>
+                    ${statusBadge}
+                </div>
+                <p class="project-description">
+                    ${project.description}
+                </p>
+                <div class="project-meta">
+                    <div class="project-tech">
+                        ${project.tags.map(tag => `<span class="tech-tag">${tag}</span>`).join('')}
+                    </div>
+                    <a href="${finalHref}" class="${linkClass}" ${linkTarget} title="${linkTitle}">
+                        ${linkIcon}
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        // Add hover effect
+        article.addEventListener('mouseenter', function() {
             this.style.zIndex = '10';
         });
         
-        card.addEventListener('mouseleave', function() {
+        article.addEventListener('mouseleave', function() {
             this.style.zIndex = '1';
+        });
+        
+        return article;
+    }
+    
+    // ================================
+    // Filter Functionality
+    // ================================
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active state
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Get filter value
+            currentFilter = this.getAttribute('data-filter');
+            
+            // Re-render projects
+            renderProjects();
+            
+            // Scroll to projects section
+            scrollToProjects();
         });
     });
     
     // ================================
-    // Parallax Effect for Hero Orbs
+    // Search Functionality
     // ================================
-    const heroOrbs = document.querySelectorAll('.gradient-orb');
-    
-    if (heroOrbs.length > 0) {
-        window.addEventListener('mousemove', (e) => {
-            const mouseX = e.clientX / window.innerWidth;
-            const mouseY = e.clientY / window.innerHeight;
-            
-            heroOrbs.forEach((orb, index) => {
-                const speed = (index + 1) * 10;
-                const x = (mouseX - 0.5) * speed;
-                const y = (mouseY - 0.5) * speed;
-                
-                orb.style.transform = `translate(${x}px, ${y}px)`;
-            });
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            currentSearch = this.value.toLowerCase().trim();
+            renderProjects();
         });
     }
     
     // ================================
-    // Smooth Reveal on Scroll
+    // URL Parameter Handling
     // ================================
-    const revealElements = document.querySelectorAll('[data-aos]');
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterParam = urlParams.get('filter');
     
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('aos-animate');
+    if (filterParam) {
+        const targetButton = document.querySelector(`[data-filter="${filterParam}"]`);
+        if (targetButton) {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            targetButton.classList.add('active');
+            currentFilter = filterParam;
+        }
+    }
+    
+    // ================================
+    // Helper Functions
+    // ================================
+    function hideLoading() {
+        if (loadingState) {
+            loadingState.style.display = 'none';
+        }
+    }
+    
+    function showError() {
+        if (loadingState) {
+            loadingState.innerHTML = `
+                <i class="fas fa-exclamation-triangle fa-3x" style="color: var(--accent-error); margin-bottom: 20px;"></i>
+                <p>Failed to load projects. Please try again later.</p>
+            `;
+        }
+    }
+    
+    function scrollToProjects() {
+        const projectsSection = document.querySelector('.projects-section');
+        if (projectsSection) {
+            const offset = 200;
+            const elementPosition = projectsSection.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    }
+    
+    // ================================
+    // Keyboard Shortcuts
+    // ================================
+    document.addEventListener('keydown', function(e) {
+        // Press '/' to focus search
+        if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            if (searchInput) {
+                searchInput.focus();
             }
-        });
-    }, {
-        threshold: 0.1
-    });
-    
-    revealElements.forEach(el => {
-        revealObserver.observe(el);
-    });
-    
-    // ================================
-    // Dynamic Year in Footer
-    // ================================
-    const currentYear = new Date().getFullYear();
-    const yearElements = document.querySelectorAll('.footer-bottom p');
-    yearElements.forEach(el => {
-        if (el.textContent.includes('2026')) {
-            el.textContent = el.textContent.replace('2026', currentYear);
+        }
+        
+        // Press 'Escape' to clear search
+        if (e.key === 'Escape') {
+            if (searchInput && searchInput === document.activeElement) {
+                searchInput.value = '';
+                currentSearch = '';
+                renderProjects();
+                searchInput.blur();
+            }
         }
     });
     
     // ================================
-    // Add loading state to external links
+    // Ripple Effect for Buttons
     // ================================
-    const externalLinks = document.querySelectorAll('a[target="_blank"]');
-    externalLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            // Add visual feedback
-            this.style.opacity = '0.6';
-            setTimeout(() => {
-                this.style.opacity = '1';
-            }, 200);
-        });
-    });
+    const addRippleEffect = (button, e) => {
+        const ripple = document.createElement('span');
+        const rect = button.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        ripple.classList.add('ripple');
+        
+        button.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    };
     
-    // ================================
-    // Hero CTA Button Ripple Effect
-    // ================================
-    const ctaButtons = document.querySelectorAll('.btn-primary, .btn-outline');
-    
-    ctaButtons.forEach(button => {
+    // Add ripple to filter buttons
+    filterButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            const ripple = document.createElement('span');
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            ripple.classList.add('ripple');
-            
-            this.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
+            addRippleEffect(this, e);
         });
     });
     
-    // Add ripple CSS dynamically
+    // Add ripple CSS
     const style = document.createElement('style');
     style.textContent = `
-        .btn {
+        .filter-btn, .btn {
             position: relative;
             overflow: hidden;
         }
@@ -146,76 +304,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     `;
     document.head.appendChild(style);
-});
-
-
-document.addEventListener('DOMContentLoaded', async function() {
-    const grid = document.getElementById('featured-grid');
-    if (!grid) {
-        console.error('featured-grid not found!');
-        return;
-    }
-    try {
-        const response = await fetch('https://raw.githubusercontent.com/Bonitabueno/0331project/refs/heads/main/0331project_home/projects.json');
-        const projects = await response.json();
-        
-        grid.innerHTML = projects.map((project, index) => {
-            
-            let buttonHtml = '';
-            if (project.status !== 'dev') {
-                const isExternal = project.externalLink && project.externalLink !== "#";
-                const finalHref = isExternal ? project.externalLink : `project-detail.html?id=${project.id}`;
-                const targetAttr = isExternal ? 'target="_blank"' : ''; 
-
-                buttonHtml = `
-                    <a href="${finalHref}" class="btn-icon" ${targetAttr}>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                `;
-            }
-
-            const isDisabled = !project.externalLink || project.externalLink === '#';
-            const linkIcon = isDisabled ? '<i class="fas fa-lock"></i>' : '<i class="fas fa-external-link-alt"></i>';
-            const linkClass = isDisabled ? 'project-link project-link-disabled' : 'project-link';
-            const linkTarget = isDisabled ? '' : 'target="_blank"';
-            const linkTitle = isDisabled ? 'Coming Soon' : 'Visit Site';
-
-            return `
-            <article class="project-card" data-aos="fade-up" data-aos-delay="${index * 100}">
-                <div class="project-image">
-                    <div class="project-image-placeholder">
-                        <i class="fas ${project.icon} fa-3x"></i>
-                    </div>
-                    <div class="project-overlay">
-                        ${buttonHtml}
-                    </div>
-                </div>
-                <div class="project-content">
-                    <div class="project-header">
-                        <h3 class="project-title">${project.title}</h3>
-                        <span class="badge badge-${project.status}">
-                            <i class="fas ${project.status === 'live' ? 'fa-circle' : 'fa-code'}"></i> 
-                            ${project.status === 'live' ? 'Live' : 'Dev'}
-                        </span>
-                    </div>
-                    <p class="project-description">${project.description}</p>
-                    <div class="project-meta">
-                        <div class="project-tech">
-                            ${project.tags.map(tag => `<span class="tech-tag">${tag}</span>`).join('')}
-                        </div>
-                        <a href="${project.externalLink}" class="${linkClass}" ${linkTarget} title="${linkTitle}">
-                            ${linkIcon}
-                        </a>
-                    </div>
-                </div>
-            </article>
-            `;
-        }).join('');
-
-        if (typeof AOS !== 'undefined') {
-            AOS.refresh();
+    
+    // ================================
+    // Dynamic Year in Footer
+    // ================================
+    const currentYear = new Date().getFullYear();
+    const yearElements = document.querySelectorAll('.footer-bottom p');
+    yearElements.forEach(el => {
+        if (el.textContent.includes('2026')) {
+            el.textContent = el.textContent.replace('2026', currentYear);
         }
-    } catch (error) {
-        console.error('Error loading projects:', error);
-    }
+    });
+    
+    // ================================
+    // Initialize - Load Projects
+    // ================================
+    loadProjects();
 });
